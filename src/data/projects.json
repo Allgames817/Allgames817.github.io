@@ -97,6 +97,191 @@
     ]
   },
   {
+    "slug": "flow-matching",
+    "date": "2026-09",
+    "title": "Flow Matching 学习与实验",
+    "category": "机器人学习",
+    "kind": "学习实验",
+    "summary": "从噪声预测走向速度场，结合 two-moons、等 NFE 求解器比较与条件动作块，拆开积分误差和生成质量。",
+    "tags": [
+      "Flow Matching",
+      "ODE",
+      "条件生成"
+    ],
+    "status": "已整理速度场、求解器与条件动作实验",
+    "cover": "flow",
+    "featured": false,
+    "overview": "VLA 学习路线第三周的研究记录：手写线性路径与 Euler，核对官方 API，再研究求解器、目标条件、端点配对和图像接口。结果来自仓库保存的本地实验。",
+    "background": "Flow Matching 保留从噪声生成动作块的接口，将训练目标改为路径速度。这里分别检查：网络是否使用条件、ODE 是否积分准确，以及样本是否接近目标分布。",
+    "work": [
+      "我梳理了线性插值、速度标签与采样 ODE，区分训练更新参数和推理更新样本。",
+      "我整理了同一 two-moons 模型的官方 API 核对与等 NFE 求解器比较，并分别解释 RMSE 和 SWD2。",
+      "我追踪了目标置换干预、双弯曲模式、独立配对与 minibatch OT，并核对图像条件动作接口的实验范围。"
+    ],
+    "method": "线性路径 xτ = (1 − τ)x0 + τx1，以 x1 − x0 为速度回归标签。推理仅接收噪声与条件，通过 dX/dτ = vθ 积分；two-moons 使用 MLP，合成动作模型额外接收目标坐标。",
+    "methodDetails": [
+      "two-moons：seed = 42，5000 次 Adam 更新、batch = 256、三层宽 128 的 SiLU MLP；同网格手写 Euler 与 flow_matching 1.0.10 的输出最大差为 0。",
+      "求解器比较固定该模型，3 个评估种子、每种子 1024 点；NFE 统计速度网络的整批前向次数。RMSE 对照同一场的 float64 Dopri5，SWD2 使用 64 个投影方向。"
+    ],
+    "results": "在 NFE = 24 时，Heun3 的端点 RMSE 为 0.000338，Euler 为 0.030299；SWD2 分别为 0.065768 与 0.072698。更准确地积分当前速度场，与改善生成分布是不同问题。",
+    "resultTable": {
+      "caption": "固定 two-moons 模型 · 等 NFE = 24；指标为 3 个评估种子的均值",
+      "columns": [
+        "求解器",
+        "步数 K",
+        "ODE RMSE",
+        "SWD2"
+      ],
+      "rows": [
+        [
+          "Euler",
+          "24",
+          "0.030299",
+          "0.072698"
+        ],
+        [
+          "Midpoint",
+          "12",
+          "0.001791",
+          "0.065498"
+        ],
+        [
+          "Heun3",
+          "8",
+          "0.000338",
+          "0.065768"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "独立训练的合成动作模型生成 16 个二维位移。Midpoint 的 NFE = 64；3 个采样种子、每种子 512 样本的目标误差为 0.0364。置换目标后，对新目标误差为 0.0362，对旧目标为 0.8068，支持输出跟随输入条件。",
+      "另一个三训练种子配对实验中，NFE = 4 的 SWD2 为独立 CFM 0.187 ± 0.021、OT-CFM 0.062 ± 0.004；均值训练时间约为 1.82 倍，± 为种子间标准差。"
+    ],
+    "next": "two-moons 与合成动作结果不等同于机器人性能。图像 PushT 补充只验证接口、两窗口过拟合和官方权重的三回合 rollout；后续需要同任务、同观测的扩散对照，以及观测与动作保持对应的配对研究。",
+    "links": [
+      {
+        "label": "GitHub · Flow Matching 研究记录",
+        "url": "https://github.com/Allgames817/Week03_Flow_Matching"
+      },
+      {
+        "label": "速度场、路径与动作块结构",
+        "url": "https://github.com/Allgames817/Week03_Flow_Matching/blob/main/02_FM_Architecture.md"
+      },
+      {
+        "label": "等 NFE 求解器与指标定义",
+        "url": "https://github.com/Allgames817/Week03_Flow_Matching/blob/main/05_Solver_NFE_Ablation.md"
+      },
+      {
+        "label": "目标干预与条件动作实验",
+        "url": "https://github.com/Allgames817/Week03_Flow_Matching/blob/main/06_Conditional_Action.md"
+      },
+      {
+        "label": "配对比较与图像条件接口",
+        "url": "https://github.com/Allgames817/Week03_Flow_Matching/blob/main/07_Coupling_and_Observation.md"
+      }
+    ],
+    "posts": []
+  },
+  {
+    "slug": "diffusion-policy",
+    "date": "2026-09",
+    "title": "Diffusion Policy 学习与消融",
+    "category": "机器人学习",
+    "kind": "学习实验",
+    "summary": "从 ACT 的动作分块走向条件扩散，在 PushT 低维观测上追踪去噪步数、推理延迟与闭环得分的关系。",
+    "tags": [
+      "Diffusion Policy",
+      "动作生成",
+      "DDIM"
+    ],
+    "status": "已整理 PushT 训练、推理消融与行为案例",
+    "cover": "diffusion",
+    "featured": false,
+    "overview": "VLA 学习路线第二周的研究记录，涵盖论文、低维 UNet、代码映射与本地 PushT 实验。结果引用公开仓库的已有日志与表格，属于小规模学习实验。",
+    "background": "ACT 留下了多模态动作与训练、推理潜变量差异的问题。条件扩散从高斯噪声逐步生成动作块；这里关注预测窗口与推理计算量如何分别影响策略。",
+    "work": [
+      "我梳理了观测条件、动作加噪、噪声预测和闭环执行的链路，并将其对应到工作区、策略、UNet 与 runner。",
+      "我整理了本地训练记录和新进程重载评估，区分噪声 MSE、闭环得分与 checkpoint 选择。",
+      "我核对了固定 EMA 模型下的 DDIM 步数消融，并追踪 env 100003、采样种子 0 的失败案例。"
+    ],
+    "method": "两帧 20 维关键点观测展平为 40 维条件。CondUnet1D 对长度 16、动作维度 2 的序列预测噪声；推理从高斯噪声出发，经 K 次更新后执行对齐的 8 个动作。",
+    "methodDetails": [
+      "训练：seed = 42，100 epochs，batch = 32，训练噪声级数 N = 100，EMA 开启；评估加载末轮 latest.ckpt 的 ema_model。",
+      "消融固定模型、归一化与观测窗口；DDIM 使用 η = 0、leading 间隔。每格为 5 个环境初态 × 3 个采样种子，每回合最多 300 步。",
+      "延迟为 RTX 4060 Laptop 上 batch-1、CUDA 同步的 predict_action 中位数；3 次预热、20 次计时，排除模型加载、数据传输和环境仿真。"
+    ],
+    "results": "在该模型与评估面板上，DDIM-10 的得分为 0.987，相比 DDIM-100 的 0.991 下降 0.004；中位延迟从 1116.1 ms 降至 116.2 ms，约快 9.60 倍。",
+    "resultTable": {
+      "caption": "固定模型推理消融 · 每格 15 个 rollout；得分为回合最高奖励的均值",
+      "columns": [
+        "采样器",
+        "平均得分",
+        "中位延迟",
+        "DDIM 加速比"
+      ],
+      "rows": [
+        [
+          "DDPM-100",
+          "0.929",
+          "1458.7 ms",
+          "N/A"
+        ],
+        [
+          "DDIM-100",
+          "0.991",
+          "1116.1 ms",
+          "1.00×"
+        ],
+        [
+          "DDIM-50",
+          "0.996",
+          "557.1 ms",
+          "2.00×"
+        ],
+        [
+          "DDIM-20",
+          "0.935",
+          "231.9 ms",
+          "4.81×"
+        ],
+        [
+          "DDIM-10",
+          "0.987",
+          "116.2 ms",
+          "9.60×"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "得分不是二值成功率。DDPM-100 是另一采样器的完整链参考，不进入 DDIM 加速比分母。",
+      "得分未随 K 单调变化：env 100003、采样种子 0 在 DDPM-100 与 DDIM-20 下仅得 0.179，其余三个 DDIM 设置得 1.0。高均值仍需结合单回合行为检查。"
+    ],
+    "next": "结论限于一个模型、5 个环境初态与当前计时条件，K = 10 是这一面板上的候选折中。后续可扩展评估初态与训练种子、视觉条件及实际计算延迟下的闭环控制。",
+    "links": [
+      {
+        "label": "GitHub · Diffusion Policy 研究记录",
+        "url": "https://github.com/Allgames817/Week02_Diffusion_Policy"
+      },
+      {
+        "label": "低维 UNet 与数据流",
+        "url": "https://github.com/Allgames817/Week02_Diffusion_Policy/blob/main/02_DP_Architecture.md"
+      },
+      {
+        "label": "PushT 训练与重载评估",
+        "url": "https://github.com/Allgames817/Week02_Diffusion_Policy/blob/main/04_Reproduction.md"
+      },
+      {
+        "label": "推理步数消融与计时协议",
+        "url": "https://github.com/Allgames817/Week02_Diffusion_Policy/blob/main/06_Inference_Step_Ablation.md"
+      },
+      {
+        "label": "行为案例与单回合结果",
+        "url": "https://github.com/Allgames817/Week02_Diffusion_Policy/blob/main/05_Behavior_Case.md"
+      }
+    ],
+    "posts": []
+  },
+  {
     "slug": "attention-resilience",
     "date": "2026-07",
     "dateEnd": "2026-09",
