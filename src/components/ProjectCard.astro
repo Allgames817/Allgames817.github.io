@@ -4,6 +4,7 @@ import { url } from '../data/site';
 import projects from '../data/projects.json';
 interface Props { project: typeof projects[number]; heading?: 'h2' | 'h3'; }
 const { project, heading: Heading = 'h3' } = Astro.props;
+const githubLink = project.links.find(link => /^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/.test(link.url));
 ---
 <article class="project-card" data-item data-category={project.category}>
   <a class="cover-link" href={url(`/projects/${project.slug}/`)} aria-label={`查看${project.title}`}><ProjectVisual project={project} /></a>
@@ -12,6 +13,9 @@ const { project, heading: Heading = 'h3' } = Astro.props;
     <Heading><a href={url(`/projects/${project.slug}/`)}>{project.title}</a></Heading>
     <p>{project.summary}</p>
     <ul class="tags" aria-label="项目标签">{project.tags.map(tag => <li>{tag}</li>)}</ul>
-    {project.group === 'tools' && <div class="tool-actions">{project.website && <a class="text-link" href={project.website} target="_blank" rel="noopener noreferrer" aria-label="打开网站（新窗口）"><span>打开网站</span><span aria-hidden="true">↗</span></a>}<a class="text-link" href={url(`/projects/${project.slug}/`)}>项目介绍</a>{project.links[0] && <a class="text-link" href={project.links[0].url} target="_blank" rel="noopener noreferrer" aria-label="GitHub（新窗口）">GitHub <span aria-hidden="true">↗</span></a>}</div>}
+    {((project.group === 'tools' && project.website) || githubLink) && <div class="tool-actions">
+      {project.group === 'tools' && project.website && <a class="text-link" href={project.website} target="_blank" rel="noopener noreferrer" aria-label="打开网站（新窗口）"><span>打开网站</span><span aria-hidden="true">↗</span></a>}
+      {githubLink && <a class="text-link" href={githubLink.url} target="_blank" rel="noopener noreferrer" aria-label="GitHub（新窗口）">GitHub <span aria-hidden="true">↗</span></a>}
+    </div>}
   </div>
 </article>
