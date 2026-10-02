@@ -1,0 +1,59 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProjectVisual from '../../components/ProjectVisual.astro';
+import PostList from '../../components/PostList.astro';
+import projects from '../../data/projects.json';
+import { posts } from '../../lib/posts';
+import { url } from '../../data/site';
+import features from '../../data/features.json';
+export function getStaticPaths() { return projects.map(project => ({ params: { slug: project.slug }, props: { project } })); }
+const { project } = Astro.props;
+const related = posts.filter(post => project.posts.some(slug => slug === post.frontmatter.slug));
+const links = project.links as { label: string; url: string }[];
+const isTool = project.group === 'tools';
+const showRelatedPosts = features.blog && (!isTool || related.length > 0);
+const sections = ['项目概述', '背景与问题', isTool ? '功能与体验' : '我的工作', isTool ? '实现方式' : '方法或系统结构', isTool ? '使用与代码' : '演示与结果', isTool ? '使用范围' : '局限与下一步', project.sourceNote && !links.length ? '资料来源' : '相关链接', ...(showRelatedPosts ? ['关联博客'] : [])];
+const hiddenSections = new Set(project.hiddenSections ?? []);
+const sectionIds = ['overview', 'background', 'work', 'method', 'results', 'next', 'links', 'related'];
+const visibleSections = sections.map((label, index) => ({ label, id: sectionIds[index] })).filter(section => !hiddenSections.has(section.id));
+---
+<Layout title={project.title} description={project.summary} section="/projects/">
+  <div class="detail-top"><a class="back-link" href={url('/projects/')}>返回项目列表</a></div>
+  <header class="detail-heading"><p class="meta">{project.category} / {project.kind}{project.date && <><span aria-hidden="true"> · </span><time datetime={project.date}>{project.date.replace('-', '.')}</time>{project.ongoing ? <>–<span>至今</span></> : project.dateEnd && <>–<time datetime={project.dateEnd}>{project.dateEnd.replace('-', '.')}</time></>}</>}</p><h1>{project.title}</h1><p>{project.summary}</p><p class="status-text">{project.status}</p></header>
+  {isTool && <div class="actions tool-detail-actions">{project.website && <a class="button primary" href={project.website} target="_blank" rel="noopener noreferrer" aria-label="打开网站（新窗口）"><span>打开网站</span><span aria-hidden="true">↗</span></a>}{links[0] && <a class="button quiet" href={links[0].url} target="_blank" rel="noopener noreferrer" aria-label="GitHub（新窗口）">GitHub <span aria-hidden="true">↗</span></a>}</div>}
+  <div class="reading-layout">
+    <article class="prose project-prose">
+      <ProjectVisual project={project} />
+      <h2 id="overview">项目概述</h2><p>{project.overview}</p>
+      <h2 id="background">背景与问题</h2><p>{project.background}</p>
+      <h2 id="work">{sections[2]}</h2><ul>{project.work.map(line => <li>{line}</li>)}</ul>
+      {!hiddenSections.has('method') && <>
+        <h2 id="method">{sections[3]}</h2><p>{project.method}</p>
+        {project.methodDetails?.map(line => <p>{line}</p>)}
+      </>}
+      {!hiddenSections.has('results') && <>
+      <h2 id="results">{sections[4]}</h2><p>{project.results}</p>
+      {project.resultTable && <table>
+        <caption>{project.resultTable.caption}</caption>
+        <thead><tr>{project.resultTable.columns.map(column => <th scope="col">{column}</th>)}</tr></thead>
+        <tbody>{project.resultTable.rows.map(row => <tr>{row.map((cell, index) => index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>)}</tr>)}</tbody>
+      </table>}
+      {project.resultDetails?.map(line => <p>{line}</p>)}
+      {project.performanceTable && <>
+        <h3>性能开销</h3>
+        <table>
+          <caption>{project.performanceTable.caption}</caption>
+          <thead><tr>{project.performanceTable.columns.map(column => <th scope="col">{column}</th>)}</tr></thead>
+          <tbody>{project.performanceTable.rows.map(row => <tr>{row.map((cell, index) => index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>)}</tr>)}</tbody>
+        </table>
+        {project.performanceDetails?.map(line => <p>{line}</p>)}
+      </>}
+      </>}
+      {!hiddenSections.has('next') && <><h2 id="next">{sections[5]}</h2><p>{project.next}</p></>}
+      {!hiddenSections.has('links') && <><h2 id="links">{sections[6]}</h2>{project.sourceNote && <p>{project.sourceNote}</p>}{links.length ? <ul>{links.map(link => <li><a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}</a></li>)}</ul> : !project.sourceNote && <p class="muted">项目代码、演示与报告链接待补充。</p>}</>}
+      {showRelatedPosts && <><h2 id="related">关联博客</h2>{related.length ? <PostList posts={related} /> : <p class="muted">暂时没有关联文章。</p>}</>}
+      <a class="back-link end-link" href={url('/projects/')}>返回项目列表</a>
+    </article>
+    <aside class="toc"><details open><summary>本页内容</summary><nav aria-label="项目目录">{visibleSections.map(section => <a href={`#${section.id}`}>{section.label}</a>)}</nav></details></aside>
+  </div>
+</Layout>

@@ -1,0 +1,45 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { profile, url } from '../../data/site';
+import features from '../../data/features.json';
+---
+<Layout title="关于" section="/about/" description="游志诚，香港中文大学（深圳）计算机工程本科生，关注机器人学习与具身智能。">
+  <header class="page-heading"><h1>关于我</h1><p translate="no">游志诚 <span class="name-separator">/</span> Zhicheng You</p></header>
+  <div class="about-layout"><div class="prose">
+    <p class="about-lead">我在{profile.school}学习计算机工程，关注具身智能、机器人学习与世界模型。</p>
+    <p>{features.blog ? '这个网站用来整理我的项目、技术探索和学习之外的生活。项目页说明做过什么，博客则留给方法、问题与思路。' : '这个网站用来整理我的项目、技术探索和学习之外的生活。'}</p>
+    <section><h2>教育背景</h2><p><strong>{profile.school}</strong><br />{profile.role}</p></section>
+    <section class="exchange-experience" aria-labelledby="exchange-title">
+      <h2 id="exchange-title">海外交流经历</h2>
+      <h3>加州大学伯克利分校</h3>
+      <p class="exchange-meta"><time datetime="2025">2025年暑期</time><span>境外交流大使</span></p>
+      <p>参加伯克利暑期项目，担任同学与学术交流处之间的联络人，协助处理行前准备与交流期间的问题，并分享境外学习经验。</p>
+      <div class="exchange-links">
+        <a class="text-link" href="https://oal.cuhk.edu.cn/article/1852" target="_blank" rel="noopener noreferrer">阅读学校经验分享 <span aria-hidden="true">↗</span></a>
+        <a class="text-link" href={url('/documents/study-abroad-ambassador-2025-public.pdf')} target="_blank" rel="noopener noreferrer" type="application/pdf">查看证明信（PDF） <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+    <section><h2>研究与技术兴趣</h2><p>主要关注具身智能、机器人学习与世界模型。相关实践包括机器人视觉、AI 系统与嵌入式开发。</p><ul class="interest-list">{profile.interests.map(item => <li>{item}</li>)}</ul></section>
+    <section><h2>团队经历</h2><p>参与 RoboMaster 算法组，主要关注机器人视觉。具体工作与可公开资料会在项目页逐步整理。</p><a href={url('/projects/robomaster-vision/')}>查看 RoboMaster 机器人视觉项目</a></section>
+    <section><h2>联系与交流</h2><p>欢迎通过 GitHub 了解我的代码与项目。</p><a class="text-link" href={profile.github} target="_blank" rel="noopener noreferrer">GitHub / Allgames817 <span aria-hidden="true">↗</span></a><p class="contact-email"><span>学校邮箱：</span><br /><a class="text-link" href={`mailto:${profile.email}`} translate="no">{profile.email}</a></p></section>
+  </div><aside class="about-note"><h2>这个小站</h2><p>把实践整理成项目，<br />{features.blog ? '把思考慢慢写成文章。' : '也记录学习之外的生活。'}</p>{features.blog && <><p>内容仍在整理中。示例草稿和待补充的信息都会明确标注。</p><a class="text-link" href={url('/blog/')}>去读一篇笔记 <span aria-hidden="true">↗</span></a></>}</aside></div>
+</Layout>
+
+<style>
+  .exchange-experience h3 { margin-block: 20px 8px; }
+  .exchange-experience .exchange-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin-block: 0 20px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .exchange-links { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 20px; }
+  .exchange-links .text-link { font-size: 14px; }
+  @media (max-width: 768px) {
+    .exchange-experience h3 { margin-top: 16px; }
+    .exchange-links { column-gap: 20px; margin-top: 16px; }
+  }
+</style>
+

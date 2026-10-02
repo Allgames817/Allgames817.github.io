@@ -1,0 +1,52 @@
+// Lifecycle regression checks in a DOM test double: no browser or network required.
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+const source = ts.transpileModule(readFileSync('src/scripts/home-sky.ts','utf8'), {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+function fixture({theme='dark',stored=null,reduced=false,mobile=false,context=true}={}) {
+  const listeners=new Map(), queries=new Map(), frames=new Map();
+  let nextFrame=1, themeObserver, intersection, drawCount=0, clearCount=0, points=[], strokes=[], path=[];
+  const emit=(target,event,value={})=>listeners.get(target+event)?.forEach(fn=>fn(value));
+  const target=id=>({addEventListener:(event,fn)=>{const key=id+event;listeners.set(key,[...(listeners.get(key)||[]),fn]);}});
+  const root={...target('root'),dataset:{theme,skyMotion:stored==='off'?'off':'on'}};
+  const body={dataset:{}};
+  const canvas={dataset:{},getContext:()=>context?{clearRect(){clearCount++;points=[];strokes=[];},setTransform(){},beginPath(){path=[];},arc(x,y,radius){drawCount++;points.push({x,y,radius});},fill(){points[points.length-1].alpha=Number(this.fillStyle.split(",").at(-1).replace(")",""));},moveTo(x,y){path.push({x,y});},lineTo(x,y){path.push({x,y});},stroke(){strokes.push([...path]);},createLinearGradient(){return {addColorStop(){}};}}:null,getBoundingClientRect:()=>({left:0,top:0,width:mobile?390:1440,height:960})};
+  const document={...target('document'),hidden:false,body,documentElement:root,querySelector:selector=>selector==='[data-sky]'?canvas:null,querySelectorAll:()=>[]};
+  const scope={document,window:target('window'),innerWidth:mobile?390:1440,innerHeight:960,devicePixelRatio:3,matchMedia:query=>{if(!queries.has(query))queries.set(query,{...target(query),matches:query.includes('reduced-motion')?reduced:query.includes('max-width')?mobile:query.includes('color-scheme')?true:!mobile});return queries.get(query);},requestAnimationFrame:fn=>{const id=nextFrame++;frames.set(id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id),MutationObserver:class{constructor(fn){themeObserver=fn;}observe(){}},ResizeObserver:class{observe(){}},IntersectionObserver:class{constructor(fn){intersection=fn;}observe(){}}};
+  vm.runInNewContext(source,scope);
+  return {canvas,body,frames,document,get points(){return points;},get strokes(){return strokes;},move:(x,y,pointerType='mouse')=>emit('document','pointermove',{clientX:x,clientY:y,pointerType}),get draws(){return drawCount;},get clears(){return clearCount;},click:()=>{root.dataset.skyMotion=root.dataset.skyMotion==='off'?'on':'off';emit('document','site:skychange');},theme:value=>{root.dataset.theme=value;themeObserver();},visible:value=>{document.hidden=!value;emit('document','visibilitychange');},intersect:value=>intersection([{isIntersecting:value}]),reduce:value=>{const query='(prefers-reduced-motion: reduce)';queries.get(query).matches=value;emit(query,'change');},step:time=>{const queued=[...frames.values()];frames.clear();queued.forEach(fn=>fn(time));}};
+}
+const normal=fixture();
+const arrival=fixture();
+const initialBrightness=arrival.points[0].alpha;
+for(let time=40;time<=3040;time+=40)arrival.step(time);
+assert.ok(arrival.points[0].alpha>initialBrightness*2,'Stars visibly brighten during the entrance');
+arrival.theme('light');arrival.theme('dark');
+assert.ok(arrival.points[0].alpha<initialBrightness*1.5,'Returning to dark restarts the gradual reveal');
+assert.equal(normal.canvas.dataset.state,'running');assert.equal(normal.frames.size,1);assert.equal(normal.canvas.width,2880,'DPR capped at 2');
+const before=normal.draws;normal.step(40);assert.ok(normal.draws>before);
+normal.click();assert.equal(normal.canvas.dataset.state,'static');assert.equal(normal.frames.size,0);
+normal.click();assert.equal(normal.frames.size,1);normal.theme('dark');assert.equal(normal.frames.size,1,'No duplicated animation loops');
+normal.visible(false);assert.equal(normal.frames.size,0);const frozen=normal.draws;normal.step(100);assert.equal(normal.draws,frozen);
+normal.visible(true);assert.equal(normal.frames.size,1);
+normal.intersect(false);assert.equal(normal.frames.size,0);normal.intersect(true);assert.equal(normal.frames.size,1);
+normal.theme('light');assert.equal(normal.canvas.dataset.state,'inactive');assert.equal(normal.frames.size,0);
+normal.theme('dark');normal.reduce(true);assert.equal(normal.frames.size,0);
+normal.reduce(false);assert.equal(normal.frames.size,1);
+const still=fixture({reduced:true});assert.equal(still.frames.size,0);assert.ok(still.draws>0,'Reduced motion retains static stars');
+const saved=fixture({stored:'off'});assert.equal(saved.canvas.dataset.state,'static','The canvas must honor a preference set before its module loaded');
+const phone=fixture({mobile:true});assert.ok(phone.draws<fixture().draws,'Mobile uses fewer particles');
+assert.doesNotThrow(()=>fixture({context:false}),'Unavailable canvas keeps the page functional');
+const interactive=fixture(), control=fixture();
+interactive.move(200,200);interactive.move(250,220);interactive.step(40);control.step(40);
+assert.notDeepEqual(interactive.points,control.points,'Mouse movement changes the visible star field');
+assert.equal(interactive.strokes.length,1,'Pointer movement creates a continuous meteor streak');
+const [tail,head]=interactive.strokes[0];assert.ok(Math.hypot(head.x-tail.x,head.y-tail.y)<=76.01,'Streak length is bounded');
+for(let time=80;time<=840;time+=40)interactive.step(time);
+assert.equal(interactive.strokes.length,0,'Meteor fades away after the mouse stops');
+interactive.click();assert.equal(interactive.frames.size,0);const paused=JSON.stringify(interactive.points);interactive.move(800,400);interactive.step(80);assert.equal(JSON.stringify(interactive.points),paused,'Paused sky does not respond to the pointer');
+const touch=fixture({mobile:true}), touchControl=fixture({mobile:true});touch.move(200,200,'touch');touch.move(250,220,'touch');touch.step(40);touchControl.step(40);assert.deepEqual(touch.points,touchControl.points,'Touch movement never creates pointer effects');
+assert.equal(touch.strokes.length,0,'Touch does not create meteors');
+console.log('PASS: sky lifecycle, preferences, visibility, continuous meteor streak and expiry, pause freezes interaction, touch exclusion, mobile density, DPR cap and canvas fallback.');
+

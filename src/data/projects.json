@@ -1,0 +1,288 @@
+[
+  {
+    "slug": "act",
+    "date": "2026-09",
+    "title": "ACT 复现与分析",
+    "category": "机器人学习",
+    "kind": "论文复现",
+    "summary": "在 Transfer Cube 仿真任务中复现 ACT，对比时间聚合与动作块长度，并追踪高成功率背后的局部失败区域。",
+    "tags": [
+      "ACT",
+      "模仿学习",
+      "Transformer"
+    ],
+    "status": "已完成复现、消融与失败分析",
+    "cover": "act",
+    "featured": true,
+    "overview": "这是 VLA 学习路线第一周的研究记录，围绕 Action Chunking with Transformers（ACT）整理论文、模型结构、代码映射与仿真实验。公开仓库汇总已有评估日志和 CSV；本页结果来自这些记录，整理笔记时未重新训练模型。",
+    "background": "逐步预测单个动作的行为克隆容易在长时序操作中累积误差。ACT 一次预测一段动作，并可通过时间聚合融合重叠预测。本项目关注：动作块长度如何影响双臂移交任务，时间聚合能改善什么，以及平均成功率会遗漏哪些失败。",
+    "work": [
+      "梳理行为克隆、动作分块、CVAE 与 DETR 风格 Transformer，并将数据加载、策略网络、损失计算和闭环评估对应到代码模块。",
+      "在 MuJoCo + dm_control 的 sim_transfer_cube_scripted 任务中复现 ACT，使用 50 条脚本示范，以固定划分种子按 80/20 分为训练集与验证集。",
+      "控制数据、模型和训练配置，对 k = 1、20、50、100 做动作块长度消融，并在相同的 50 个评估初始位姿上对比有无时间聚合。",
+      "追踪唯一未被时间聚合修复的 rollout 33，整理固定位置的 10 次复测与附近 7 × 7 网格评估，区分总体表现与空间泛化弱点。"
+    ],
+    "method": "策略输入为 top 相机图像和 14 维关节状态，输出 k 个 14 维关节动作。ResNet18 提取视觉特征，Transformer 编解码器预测动作块；训练时 CVAE 编码示范动作得到潜变量，推理时将潜变量置零。",
+    "results": "主实验 k = 100 时，时间聚合将成功率从 42/50（84%）提高到 49/50（98%），增加 14 个百分点；平均回报从 555.24 提高到 604.76。动作块消融显示，在本次设置下，无时间聚合的成功率随 k 增大而上升。",
+    "next": "结果限于单个仿真任务与当前训练、评估种子，未验证真实机器人、人类示范数据或插入任务。失败区域属于训练采样范围内的边界泛化弱点，不能称为严格的分布外失败。下一步可扩展多种子与更密集的位置扫描，并对比 Diffusion Policy 的动作生成和空间覆盖。",
+    "links": [
+      {
+        "label": "GitHub · ACT 研究记录",
+        "url": "https://github.com/Allgames817/Week01_ACT"
+      },
+      {
+        "label": "复现配置与评估协议",
+        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/04_Reproduction.md"
+      },
+      {
+        "label": "动作块长度消融报告",
+        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/06_Chunk_Size_Ablation.md"
+      },
+      {
+        "label": "失败分析与区域分布图",
+        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/05_Failure_Analysis.md"
+      },
+      {
+        "label": "原始评估日志与 CSV",
+        "url": "https://github.com/Allgames817/Week01_ACT/tree/main/results"
+      }
+    ],
+    "posts": [
+      "act-data-flow",
+      "act-to-diffusion"
+    ],
+    "methodDetails": [
+      "主实验：k = 100，batch size = 2（8 GB 显存限制），hidden dimension = 512，feedforward dimension = 3200，KL 权重 = 10，学习率 = 1e-5，训练 2000 epochs，训练种子 = 0。",
+      "每回合 400 步，控制间隔 0.02 s；k = 100 对应 2 s 预测窗口。无时间聚合时整块执行；有时间聚合时每 20 ms 重新预测，并对重叠动作做指数加权融合。",
+      "按最低验证损失选择 checkpoint，评估种子固定为 1000；最高奖励达到 4 视为成功。下表为同一组 50 个初始位姿的任务成功率。"
+    ],
+    "resultTable": {
+      "caption": "动作块长度消融 · 每种设置评估 50 个相同初始位姿",
+      "columns": [
+        "动作块 k",
+        "预测窗口",
+        "无时间聚合",
+        "有时间聚合"
+      ],
+      "rows": [
+        [
+          "1",
+          "0.02 s",
+          "0%",
+          "0%"
+        ],
+        [
+          "20",
+          "0.40 s",
+          "32%",
+          "64%"
+        ],
+        [
+          "50",
+          "1.00 s",
+          "72%",
+          "74%"
+        ],
+        [
+          "100",
+          "2.00 s",
+          "84%",
+          "98%"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "失败分析：rollout 33 位于训练采样范围的左下边界附近，固定该位置复测为 0/10 成功。附近 49 个网格点中，34 个完全成功、6 个部分完成、9 个奖励为零；另行重放的原失败位置不计入这 49 个点。",
+      "关键认识：时间上的鲁棒性不等于空间泛化；k = 1 即使验证损失较低，闭环成功率仍为 0%。因此需要同时检查任务成功率、状态空间覆盖与失败轨迹。"
+    ]
+  },
+  {
+    "slug": "attention-resilience",
+    "date": "2026-07",
+    "dateEnd": "2026-09",
+    "title": "FlashAttention / Softmax 容错分析与验证",
+    "category": "AI 系统",
+    "kind": "算子可靠性",
+    "summary": "在 Ascend 上分析 Online Softmax 的累计状态，设计影响量检测，并通过故障注入与 logZ 比较验证容错方案。",
+    "tags": [
+      "Ascend",
+      "FlashAttention",
+      "Softmax"
+    ],
+    "status": "已完成状态量分析与 FP32 测试验证",
+    "cover": "attention",
+    "featured": false,
+    "overview": "围绕 FlashAttention 中 Online Softmax 的累计分母 l，分析中间量错误如何传播，设计抽样检测量，并整理正确性、故障注入、位敏感度与性能测试。两份报告分别记录多精度功能测试，以及限定 FP32 的关键量分析与验证。",
+    "background": "Online Softmax 按 tile 更新最大值 m 与累计分母 l。重缩放系数 α 的误差会被历史累计量放大，已有状态错误也可能跨 tile 传播；与此同时，lazy-max 允许不同的 (m, l) 表示同一归一化状态，直接比较原始 max / sum 会产生误判。",
+    "work": [
+      "从 l 的递推公式做一阶扰动分析，区分当前 tile 增量 p_rowsum、历史重缩放系数 α 与累计状态 l_old 的影响。",
+      "以 αImpact 衡量重缩放误差对 l 的实际影响，结合分母残差检测；通过独立计算期望最大值与 α，降低主计算和检测路径的共模错误风险。",
+      "整理故障注入后的 shadow state 恢复、fault flag 读改写、采样键与符合检测条件样本的统计，验证三类中间量的 bit-23 注入与位敏感度。",
+      "使用 canonical logZ 比较 Softmax 状态，修正 lazy-max 表示差异引起的测试误判，并区分容错开关的数值影响与增量性能开销。"
+    ],
+    "method": "核心递推为 l_new = α × l_old + p_rowsum，其中 α = exp(m_old − m_new)。一阶扰动为 Δl_new ≈ l_old × Δα + α × Δl_old + Δp_rowsum，分别对应历史状态重缩放、跨 tile 状态传播与当前 tile 增量。",
+    "methodDetails": [
+      "检测量 αImpact = |α − α_expected| × |l_old|，关注误差对分母的影响。首个 tile 的 l_old = 0，α 不影响分母更新，因此不计入 α 检测的有效样本。另用 l_residual = |l_new − l_expected| 检查递推一致性。",
+      "对于 lazy-max，使用 logZ = m + log(l) 比较等价的归一化状态；attention 输出仍逐元素比较，原始 max / sum 仅作为诊断信息，无需修改 kernel ABI。",
+      "2026 年 7 月 22 日的功能测试环境：Ascend 910、CANN 9.0.0，正态分布输入、seed = 42；覆盖 FP32 / FP16 / BF16，S = 1024 / 2048 / 4096，B = 1、N = 64、D = 128。",
+      "两份报告的检测范围不同：7 月 22 日报告在 S > 1024 时测试三种精度；关键量分析报告仅启用 FP32、S > 1024 的抽样检测。FP16 / BF16 保留计算输出，因跨运行误报、开销与阈值稳定性问题暂未启用检测。",
+      "7 月 22 日的故障注入设置为 FT_FAULT_INJECT = 4、bit = 23。S = 1024 不执行 Softmax 直接校验；S = 2048 / 4096 检查抽样标记、fault flag 和 attention 输出。"
+    ],
+    "results": "关键量分析报告中，使用 logZ 修正比较口径后，正确性测试从 14/18 提升至 18/18 通过；正式故障注入测试 9/9、单元测试 5/5 通过，所测 FP32 无故障案例未发现误报。",
+    "resultTable": {
+      "caption": "Bit-23 三量注入 · FP32，仅统计符合检测条件的样本",
+      "columns": ["注入量", "S = 2048", "S = 4096", "检出率"],
+      "rows": [
+        ["p_rowsum", "32/32", "96/96", "100%"],
+        ["α", "16/16", "64/64", "100%"],
+        ["l_old", "22/22", "75/75", "100%"]
+      ]
+    },
+    "resultDetails": [
+      "表示误判修正：原先 4 个失败案例来自 lazy-max 的 (m, l) 表示差异。S = 2048 / 4096 的 attention 误差分别为 2.24e-7 / 2.09e-7，logZ 误差为 2.42e-7 / 2.89e-7；两种长度的 fault 数均为 0。",
+      "位敏感度：α 的 bit0–4 低于影响阈值，bit5–31 的有效样本全部检出，较旧方案约从 bit13 开始检测扩大了低位覆盖。p_rowsum 的 bit0–12 未超过阈值、bit13 部分检出、bit14 接近完全检出、bit15–31 基本达到 100%；l_old 的 bit0–12 部分检出、bit14 接近完全检出、bit15–31 达到或接近 100%。",
+      "7 月 22 日的注入矩阵包含 6 个 S > 1024 正向案例和 3 个 S = 1024 负向案例，9/9 通过。正向案例全部检出并置位 bit_or = 0x4；负向案例未执行注入、无误报。",
+      "容错开关对比：7 月 22 日的 FP32、S = 2048 / 4096 测试中，bmm_only 与 full 的 attentionOut、softmaxMax 和 softmaxSum 逐元素完全一致。custom / system 的辅助输出差异在两档中均存在，该报告因此将完整 API 一致性判为 Conditional Pass。"
+    ],
+    "performanceTable": {
+      "caption": "7 月 22 日报告 · Softmax 增量开销 = full / bmm_only − 1",
+      "columns": ["精度", "序列长度 S", "增量开销"],
+      "rows": [
+        ["FP32", "2048", "+10.53%"],
+        ["FP32", "4096", "−2.18%"],
+        ["FP16", "2048", "+4.76%"],
+        ["FP16", "4096", "+2.80%"],
+        ["BF16", "2048", "+3.30%"],
+        ["BF16", "4096", "+3.37%"]
+      ]
+    },
+    "performanceDetails": [
+      "测量采用 5 次预热、30 次计时、3 轮重复取中位数。以上 6 组启用检测的测试点，增量开销的中位数约 3.34%，算术平均约 3.76%；基线为 bmm_only，而非 system 算子。",
+      "FP32 / 4096 的负增量不作为加速结论。BF16 / 4096 首次出现超过 180 秒的异常样本，表中采用独立补跑 3 轮后的中位数；S = 1024 未启用检测，其时间差不计入上述汇总。这组数据仅代表 7 月 22 日报告的测试配置。"
+    ],
+    "next": "当前关键量检测结论限定于 FP32、S > 1024 和报告中的抽样及注入条件，不能据此推断任意故障均可检出。下一步是稳定低精度阈值与跨运行行为，补充修订检测方案的性能测量，并继续区分 canonical 状态等价性与完整 API 辅助输出的一致性。",
+    "sourceNote": "依据《关于 Softmax 中影响 l 的关键量分析与测试报告》（第 1–6 页）与《FlashAttention Softmax 容错测试报告》（2026-07-22，第 1–4 页）整理。",
+    "links": [],
+    "posts": []
+  },
+  {
+    "slug": "robomaster-vision",
+    "hiddenSections": ["method", "results", "next", "links"],
+    "date": "2025-07",
+    "ongoing": true,
+    "title": "RoboMaster 机器人视觉",
+    "category": "机器人视觉",
+    "kind": "团队项目",
+    "summary": "参与 RoboMaster 算法组，关注从图像感知到机器人系统协作的视觉链路。",
+    "tags": [
+      "RoboMaster",
+      "计算机视觉",
+      "团队协作"
+    ],
+    "status": "团队实践",
+    "cover": "vision",
+    "featured": false,
+    "overview": "参与 RoboMaster 算法组，主要关注机器人视觉。项目以团队协作为背景，个人贡献与团队成果分别记录。",
+    "background": "机器人视觉需要在感知、信息传递与系统协作之间建立清晰的接口。具体赛季、设备和任务细节待补充。",
+    "work": [
+      "参与 RoboMaster 算法组，关注机器人视觉。",
+      "具体承担模块、代码贡献和协作方式待补充。"
+    ],
+    "method": "用图像输入、视觉处理与系统接口三个部分描述概念分工。实际架构以未来公开资料为准。",
+    "results": "可公开的演示、测试和团队结果待补充；不将团队整体成果归为个人独立完成。",
+    "next": "整理个人工作边界与模块接口，在团队允许的范围内补充资料。",
+    "links": [],
+    "posts": [
+      "vision-modules"
+    ]
+  },
+  {
+    "slug": "embedded-vision",
+    "date": "2026-08",
+    "title": "电赛视觉识别与无线图传",
+    "category": "工程实践",
+    "kind": "嵌入式视觉",
+    "summary": "面向 2026 电赛 H 题，在 K230 上实现钢球检测、标定位置串口输出，以及浏览器无线图传与测试录像。",
+    "tags": [
+      "K230",
+      "YOLOv8",
+      "UART",
+      "MJPEG"
+    ],
+    "status": "识别与图传代码已开源",
+    "cover": "embedded",
+    "featured": false,
+    "overview": "面向车载平衡滚球运动控制系统，项目在 CanMV K230 上实现两套可独立运行的视觉程序：一套检测钢球并向外部控制器发送位置，一套通过 Wi-Fi 将带检测叠加的画面传到浏览器，辅助观察与调试。",
+    "background": "控制端需要可解释的钢球位置反馈，调试时也需要看到摄像头画面和识别状态。因此系统同时考虑图像检测、机械中心与方向标定、串口数据接口，以及无需专用客户端的局域网图传。",
+    "work": [
+      "钢球识别：通过 YOLOv8 的 K230 模型检测钢球，计算中心坐标、置信度和有符号位置，并通过 UART1 输出。",
+      "位置标定：用 center.cfg、PLUS.cfg 和 Minus.cfg 保存机械中心及正负方向参考位置，供位置换算使用。",
+      "无线图传：提供带检测结果叠加的 MJPEG 浏览器画面、H.264 测试录像和录像控制页面；启动脚本支持上电启动与异常退出后重试。",
+      "采集与联调：提供钢球和标定图像采集脚本、ball / zero / limit 三类原始数据采集及 manifest.csv 记录，以及独立的 UART2 固定坐标发送测试。"
+    ],
+    "method": "硬件与运行环境为 CanMV K230、MicroPython 固件 v1.8、OV5647 摄像头和 800 × 480 ST7701 LCD；可选 TI MSPM0 控制器接收串口数据。钢球识别与无线图传程序均占用摄像头和显示资源，使用时按任务选择一个入口。",
+    "results": "公开仓库已提供识别、图传、数据采集与串口测试脚本，以及 best.kmodel 和位置标定配置。当前可展示的成果是从摄像头采集、模型推理到位置输出和浏览器调试的完整软件链路；识别精度、端到端延迟、帧率与长期稳定性仍需在明确测试条件下量化。",
+    "next": "脚本依赖 CanMV 固件，不能直接在普通 CPython 环境运行。模型输入尺寸和类别顺序必须与脚本匹配，图传与识别入口的模型路径也不同。机械结构变化后需重新标定；后续重点是量化位置误差、通信延迟与丢球恢复表现，并补充真实设备演示。",
+    "links": [
+      {
+        "label": "GitHub · 电赛视觉项目",
+        "url": "https://github.com/Allgames817/2026-electronic-design-contest-vision"
+      },
+      {
+        "label": "钢球检测与串口位置输出",
+        "url": "https://github.com/Allgames817/2026-electronic-design-contest-vision/blob/main/steel_ball_best.py"
+      },
+      {
+        "label": "无线图传与录像程序",
+        "url": "https://github.com/Allgames817/2026-electronic-design-contest-vision/blob/main/mjpeg_steel_ball_server.py"
+      },
+      {
+        "label": "数据采集脚本",
+        "url": "https://github.com/Allgames817/2026-electronic-design-contest-vision/blob/main/capture_yolo_3class_final.py"
+      }
+    ],
+    "posts": [],
+    "methodDetails": [
+      "识别入口 steel_ball_best.py：加载 best.kmodel 和三个标定文件，在屏幕显示结果，经 UART1 以 115200 波特率、8N1 输出数据。",
+      "成功检测时发送 BALL,cx,cy,confidence 与 POS,signed_position_cm；丢失目标时发送 BALL,-1,-1,0 与 POS,NA，使接收端能够区分有效位置与未检测状态。",
+      "图传入口 mjpeg_steel_ball_server.py：连接 Wi-Fi，使用匹配的 steel_ball.kmodel，通过设备 IP 的 8080 端口提供画面；/control 页面控制录像，文件保存在设备的 /data/Video 目录。"
+    ]
+  },
+  {
+    "slug": "credit-transfer",
+    "date": "2026-04",
+    "group": "tools",
+    "website": "https://lgu-cts.up.railway.app/",
+    "screenshot": {
+      "src": "/images/credit-transfer.png",
+      "srcEn": "/images/credit-transfer-en.png",
+      "alt": "转学分查询网站界面：地区与院校筛选、课程搜索和课程对应列表",
+      "caption": "线上查询界面",
+      "width": 1234,
+      "height": 712
+    },
+    "title": "港中深转学分查询",
+    "category": "工具与作品",
+    "kind": "校园工具",
+    "summary": "为准备交流交换的同学，提供海外课程与港中深课程的学分转换关系查询。",
+    "tags": ["React", "Express", "课程查询"],
+    "status": "可在线使用 · 代码已公开",
+    "cover": "credit-transfer",
+    "featured": true,
+    "overview": "围绕交流交换选课，把合作院校课程与港中深课程的转换关系整理成可检索的网页工具。",
+    "background": "选课时，既需要从交换院校查找课程，也需要从本校课程反查对应关系。工具把这两种查询路径放在同一个界面中。",
+    "work": [
+      "按地区、院校、学院筛选，结合课程名称或代码搜索，缩小选课范围。",
+      "支持中英文界面、深色模式和手机浏览。",
+      "同学可提交转学分记录，管理员审核后加入课程库；另有建议反馈入口。"
+    ],
+    "method": "前端使用 React 与 Vite，后端使用 Node.js 与 Express，分别处理查询界面、课程数据与提交审核。",
+    "results": "公开仓库包含查询、提交、审核与课程维护代码。可通过下方链接查看功能说明和本地运行方法。",
+    "next": "网站整理过往转学分案例，当前主要覆盖 SSE、SDS、SME，GE 暂以港中大暑课案例为主。查询结果供选课参考，最终认定以学院教务处审批为准。",
+    "links": [
+      {"label": "GitHub · 转学分查询", "url": "https://github.com/Allgames817/LGU_Credit_Transfer_Search"},
+      {"label": "功能说明与运行方法", "url": "https://github.com/Allgames817/LGU_Credit_Transfer_Search#readme"}
+    ],
+    "posts": []
+  }
+]

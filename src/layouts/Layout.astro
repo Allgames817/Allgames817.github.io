@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import { profile, navigation, url } from '../data/site';
+import { languageBootstrap, pageTranslations } from '../lib/language-bootstrap';
+import { headerBootstrap } from '../lib/header-bootstrap';
+interface Props { title: string; description?: string; section?: string; home?: boolean; }
+const { title, description = profile.intro, section = '/', home = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const skySection = ['/projects/', '/blog/', '/life/', '/about/'].includes(section) ? section.slice(1, -1) : undefined;
+const content = await Astro.slots.render('default');
+const dictionary = pageTranslations(content, [title, description, ...navigation.map(item => item.label), `© ${new Date().getFullYear()} ${profile.name}`]);
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content={description} />
+  <meta name="color-scheme" content="light dark" />
+  <meta property="og:title" content={`${title} · ${profile.name}`} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+  <title>{title} · {profile.name}</title>
+  <script is:inline>
+    try {
+      const saved = localStorage.getItem('theme');
+      document.documentElement.dataset.theme = saved === 'light' || saved === 'dark' ? saved : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch (_) { document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+    try { document.documentElement.lang = localStorage.getItem('language') === 'zh-CN' ? 'zh-CN' : 'en'; }
+    catch (_) { document.documentElement.lang = 'en'; }
+  </script>
+  <script is:inline type="application/json" data-language-translations set:html={dictionary}></script>
+  <script is:inline set:html={languageBootstrap}></script>
+</head>
+<body class:list={{ 'home-page': home, 'content-sky-page': Boolean(skySection) }} data-sky-section={skySection}>
+  {skySection && <div class="section-sky" aria-hidden="true"></div>}
+  {home && <canvas class="sky-canvas" aria-hidden="true" data-sky></canvas>}
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" translate="no" href={url('/')}><span>{profile.name}</span><small>{profile.englishName}</small></a>
+      <button class="menu-toggle" type="button" aria-label="打开导航菜单" aria-controls="main-nav" aria-expanded="false" hidden>菜单</button>
+      <nav id="main-nav" aria-label="主导航">
+        {navigation.map(item => <a href={url(item.path)} aria-current={section === item.path ? 'page' : undefined}>{item.label}</a>)}
+      </nav>
+      <div class="header-tools"><a class="github-link" href={profile.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub（新窗口）">GitHub <span aria-hidden="true">↗</span></a><button type="button" class="theme-toggle" aria-label="切换明暗主题" hidden><span data-theme-label>深色</span></button>
+        <button type="button" class="language-toggle" data-language-toggle lang="en" translate="no" aria-label="切换到英文" hidden>EN</button>
+        <details class="display-settings" data-display-settings hidden><summary aria-label="显示设置" title="显示设置"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m9.5 3-.6 2.3-2 .9-2.1-.6-2.5 4.3 1.6 1.7v2.3l-1.6 1.7L4.8 20l2.1-.6 2 .9.6 2.2h5l.6-2.2 2-.9 2.1.6 2.5-4.4-1.6-1.7v-2.3l1.6-1.7-2.5-4.3-2.1.6-2-.9-.6-2.3Z" transform="translate(0 -1) scale(1 .96)"/><circle cx="12" cy="11.7" r="3.3"/></svg></summary><div class="settings-panel"><h2>显示设置</h2><p>暗色首页</p><div class="sky-controls" data-sky-controls hidden><button class="sky-toggle" type="button" aria-pressed="true" data-sky-toggle>星空动效：开</button><span class="sky-motion-note" data-sky-note hidden>跟随系统 · 静态星空</span></div><p class="settings-description">控制暗色首页的星空与鼠标流星效果，偏好在全站保存。</p></div></details>
+      </div>
+    </div>
+  </header>
+  <script is:inline data-header-controls set:html={headerBootstrap}></script>
+  <main id="main" tabindex="-1" class="container"><Fragment set:html={content} /></main>
+  <footer class="site-footer container"><span>© {new Date().getFullYear()} {profile.name}</span><div class="footer-links"><a href={profile.github} target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a><a href={`mailto:${profile.email}`}>{profile.email}</a></div></footer>
+  <script src="../scripts/site.ts"></script>
+</body>
+</html>
+
+

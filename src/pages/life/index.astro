@@ -1,0 +1,65 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import MusicShelf, { type Music } from '../../components/MusicShelf.astro';
+import life from '../../data/life.json';
+import { url } from '../../data/site';
+interface BookQuote { text: string; page?: string; }
+interface Book {
+  id: string;
+  title: string;
+  author?: string;
+  readAt: string;
+  cover?: string;
+  quotes?: BookQuote[];
+  thought?: string;
+  noteUrl?: string;
+}
+const books = [...life.books as Book[]].sort((a, b) => b.readAt.localeCompare(a.readAt));
+const music = life.music as Music[];
+---
+<Layout title="生活" section="/life/" description="学习之外的书架、音乐与随记。">
+  <header class="page-heading"><h1>生活</h1><p>留一点位置给学习之外。</p></header>
+  <section class="life-section bookshelf-section" aria-labelledby="bookshelf-title">
+    <h2 id="bookshelf-title">书架</h2>
+    {books.length ? <div class="bookshelf-grid">
+      {books.map(book => <article class:list={['book-entry', { 'has-cover': book.cover }]} aria-labelledby={`book-${book.id}`}>
+        {book.cover && <div class="book-cover" aria-hidden="true">
+          <img src={book.cover.startsWith('/') ? url(book.cover) : book.cover} alt="" width="300" height="450" loading="lazy" decoding="async" />
+        </div>}
+        <div class="book-copy">
+          <h3 id={`book-${book.id}`}>{book.title}</h3>
+          {book.author && <p class="book-author">{book.author}</p>}
+          <p class="book-date"><span>读于</span><time datetime={book.readAt} translate="no">{book.readAt.replace('-', '.')}</time></p>
+          {book.quotes?.filter(quote => quote.text.trim()).map(quote => <blockquote class="book-quote"><p>{quote.text}</p>{quote.page && <cite>{quote.page}</cite>}</blockquote>)}
+          {book.thought?.trim() && <p class="book-thought">{book.thought}</p>}
+          {book.noteUrl && <a class="book-note-link text-link" href={book.noteUrl.startsWith('/') ? url(book.noteUrl) : book.noteUrl}>阅读笔记 <span aria-hidden="true">↗</span></a>}
+        </div>
+      </article>)}
+    </div> : <div class="life-empty"><p class="empty-title">书架暂时留白。</p><p>真实书单整理好后，会在这里放上书名、阅读状态和简短感想。</p></div>}
+  </section>
+  <div class="life-secondary">
+    <MusicShelf music={music} />
+  </div>
+  <section class="notes-section" aria-labelledby="notes-title">
+    <h2 id="notes-title">随记</h2>
+    {life.notes.map(note => <article class="note">
+      <p class="meta"><time datetime={note.time}>{note.period}</time></p>
+      <div>
+        <h3><a href={url(`/life/${note.slug}/`)}>{note.title}</a></h3>
+        <p>{note.description}</p>
+        <a class="text-link" href={url(`/life/${note.slug}/`)}>阅读全文 <span aria-hidden="true">→</span></a>
+      </div>
+    </article>)}
+  </section>
+</Layout>
+
+<style>
+  .notes-section { margin-top: 56px; }
+  .note .meta { margin-top: 0; padding-top: 4px; }
+  .note h3 a:hover { color: var(--accent); }
+  .note .text-link { margin-top: 12px; }
+  @media (max-width: 768px) {
+    .notes-section { margin-top: 40px; }
+    .note { gap: 8px; }
+  }
+</style>

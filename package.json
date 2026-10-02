@@ -1,0 +1,32 @@
+{
+  "name": "zhicheng-personal-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "check": "astro check",
+    "test:static": "node scripts/check-static.mjs",
+    "test:sky": "node scripts/check-sky.mjs",
+    "test:browser": "node scripts/check-browser.mjs",
+    "test:language": "node scripts/check-language.mjs",
+    "test:language-bootstrap": "node scripts/check-language-bootstrap.mjs",
+    "test:header-bootstrap": "node scripts/check-header-bootstrap.mjs",
+    "design:check": "powershell -NoProfile -File scripts/check-design.ps1"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@astrojs/markdown-remark": "^7.3.1",
+    "astro": "^7.3.3",
+    "katex": "^0.18.7",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0"
+  }
+}

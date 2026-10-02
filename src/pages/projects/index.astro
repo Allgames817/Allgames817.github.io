@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Filters from '../../components/Filters.astro';
+import projects from '../../data/projects.json';
+const moreProjects = projects.filter(project => !project.featured).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+---
+<Layout title="项目" section="/projects/" description="游志诚的机器人学习、工程实践，以及解决日常问题的工具与作品。">
+  <header class="page-heading"><h1>项目</h1><p>从理解一个方法，到把它放进系统。<br />这里整理我的复现、探索，以及解决日常问题的工具。</p></header>
+  <Filters categories={['机器人学习', '机器人视觉', 'AI 系统', '工程实践', '工具与作品']} />
+  <section class="project-group" data-result-group aria-labelledby="featured-projects"><h2 class="collection-heading" id="featured-projects">精选项目</h2><div class="project-grid">{projects.filter(project => project.featured).map(project => <ProjectCard project={project} />)}</div></section>
+  <section class="project-group" data-result-group aria-labelledby="more-projects"><h2 class="collection-heading" id="more-projects">更多探索</h2><div class="project-grid">{moreProjects.map(project => <ProjectCard project={project} />)}</div></section>
+  <div class="empty-state" data-empty hidden><h2>这个分类还没有项目</h2><p>换个分类，继续看看。</p><button class="button" data-reset>显示全部项目</button></div>
+  <p class="collection-note">封面区分概念示意与真实界面截图；项目详情中的实验数据、实现说明与代码链接均注明具体来源。</p>
+</Layout>

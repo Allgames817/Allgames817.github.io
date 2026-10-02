@@ -1,0 +1,105 @@
+---
+import { url } from '../data/site';
+
+export interface Music {
+  title: string;
+  artist: string;
+  url?: string;
+  cover?: string;
+  note?: string;
+}
+
+interface Props { music: Music[]; }
+const { music } = Astro.props;
+const listeningUrl = (value?: string) => {
+  if (!value) return undefined;
+  try {
+    const parsed = new URL(value);
+    return ['https:', 'http:'].includes(parsed.protocol) ? parsed.href : undefined;
+  } catch { return undefined; }
+};
+---
+
+<section class="life-section music-section" aria-labelledby="music-title">
+  <h2 id="music-title">音乐</h2>
+  {music.length ? <ul class="music-list" role="list">
+    {music.map((item, index) => {
+      const href = listeningUrl(item.url);
+      return <li class:list={['music-track', { 'has-cover': item.cover }]}>
+        {item.cover && <div class="music-cover" aria-hidden="true">
+          <img src={item.cover.startsWith('/') ? url(item.cover) : item.cover} alt="" width="112" height="112" loading="lazy" decoding="async" />
+        </div>}
+        <div class="music-copy">
+          <h3 id={`music-track-${index}`}>{item.title}</h3>
+          <p class="music-artist">{item.artist}</p>
+          {item.note?.trim() && <p class="music-note">{item.note}</p>}
+          {href && <a class="music-listen text-link" href={href} target="_blank" rel="noopener noreferrer" aria-describedby={`music-track-${index}`}>打开音乐链接</a>}
+        </div>
+      </li>;
+    })}
+  </ul> : <div class="music-empty">
+    <svg class="music-record" width="132" height="132" viewBox="0 0 132 132" fill="none" aria-hidden="true" focusable="false">
+      <circle class="record-ground" cx="66" cy="66" r="65" />
+      <g class="record-grooves">
+        <circle cx="66" cy="66" r="64.5" />
+        <circle cx="66" cy="66" r="55" />
+        <circle cx="66" cy="66" r="49" />
+        <circle cx="66" cy="66" r="43" />
+        <circle cx="66" cy="66" r="37" />
+      </g>
+      <circle class="record-label" cx="66" cy="66" r="24" />
+      <circle class="record-spindle" cx="66" cy="66" r="3" />
+    </svg>
+    <div class="music-empty-copy">
+      <p class="music-empty-title">还没有放上歌单。</p>
+      <p>以后在这里分享音乐链接，让每一次播放都由你自己决定。</p>
+    </div>
+  </div>}
+</section>
+
+<style>
+  .music-section { min-width: 0; }
+  .music-empty {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    align-items: center;
+    gap: 28px;
+    padding-block: 32px 8px;
+  }
+  .music-record { display: block; width: 132px; height: 132px; color: var(--muted); }
+  .record-ground { fill: currentColor; fill-opacity: .035; }
+  .record-grooves { stroke: currentColor; stroke-width: 1; opacity: .3; }
+  .record-label { fill: currentColor; fill-opacity: .07; stroke: currentColor; stroke-opacity: .4; stroke-width: 1; }
+  .record-spindle { fill: currentColor; opacity: .7; }
+  .music-empty-copy { min-width: 0; max-width: 34ch; font-size: 14px; line-height: 1.9; color: var(--muted); }
+  .music-empty-title { margin-bottom: 12px; font-size: 21px; line-height: 1.5; color: var(--text); text-wrap: balance; }
+  .music-list { list-style: none; margin: 28px 0 0; padding: 0; max-width: 640px; }
+  .music-track { min-width: 0; padding-block: 24px; }
+  .music-track:first-child { padding-top: 0; }
+  .music-track + .music-track { border-top: 1px solid var(--line); }
+  .music-track.has-cover { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 20px; align-items: start; }
+  .music-cover img { display: block; width: 56px; height: 56px; object-fit: cover; border-radius: 4px; }
+  .music-copy { min-width: 0; }
+  .music-copy h3 { font-size: 21px; line-height: 1.5; }
+  .music-artist { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .music-note { color: var(--muted); font-size: 14px; line-height: 1.9; margin-top: 12px; max-width: 50ch; }
+  .music-listen { margin-top: 8px; text-decoration: underline; }
+  .music-listen:active { color: var(--text); }
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .music-empty { grid-template-columns: 104px minmax(0, 1fr); gap: 24px; }
+    .music-record { width: 104px; height: 104px; }
+    .music-empty-title { font-size: 19px; }
+  }
+  @media (max-width: 768px) {
+    .music-empty { padding-block: 28px 8px; }
+    .music-empty-title { font-size: 19px; }
+    .music-copy h3 { font-size: 20px; }
+    .music-list { margin-top: 24px; }
+  }
+  @media (max-width: 480px) {
+    .music-empty { grid-template-columns: 1fr; gap: 24px; }
+    .music-record { width: 112px; height: 112px; }
+    .music-empty-copy { max-width: 36ch; }
+    .music-track.has-cover { gap: 16px; }
+  }
+</style>

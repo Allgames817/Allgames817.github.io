@@ -1,0 +1,23 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { posts } from '../../lib/posts';
+import projects from '../../data/projects.json';
+import { url } from '../../data/site';
+import 'katex/dist/katex.min.css';
+export function getStaticPaths() { return posts.map(post => ({ params: { slug: post.frontmatter.slug }, props: { post } })); }
+const { post } = Astro.props;
+const { Content, frontmatter: p } = post;
+const headings = post.getHeadings().filter(h => h.depth === 2);
+const related = projects.filter(project => p.projects.includes(project.slug));
+---
+<Layout title={p.title} description={p.description} section="/blog/">
+  <div class="detail-top"><a class="back-link" href={url('/blog/')}>返回文章列表</a></div>
+  <header class="detail-heading"><p class="meta">{p.category} {p.draft && <span class="draft">示例草稿</span>}{p.date && <time datetime={p.date}>{p.date}</time>}</p><h1>{p.title}</h1><p>{p.description}</p></header>
+  <div class="reading-layout">
+    <article class="prose">{p.draft && <p class="draft-notice">示例草稿：本文用于展示技术文章的内容组织与排版，不是个人实验报告，也不代表正式发表。</p>}<Content />
+      {related.length > 0 && <section class="related-projects"><h2>相关项目</h2>{related.map(project => <p><a href={url(`/projects/${project.slug}/`)}>{project.title}</a></p>)}</section>}
+      <a class="back-link end-link" href={url('/blog/')}>返回文章列表</a>
+    </article>
+    {headings.length >= 3 && <aside class="toc"><details open><summary>文章目录</summary><nav aria-label="文章目录">{headings.map(h => <a href={`#${h.slug}`}>{h.text}</a>)}</nav></details></aside>}
+  </div>
+</Layout>

@@ -1,0 +1,24 @@
+---
+interface Props { type: string; }
+const { type } = Astro.props;
+const data: Record<string, { title: string; nodes: string[]; sub: string[] }> = {
+  act: { title: '从观测到动作', nodes: ['观测', '策略模型', '动作序列'], sub: ['Observation', 'Transformer', 'Action chunk'] },
+  attention: { title: '计算与可靠性', nodes: ['注意力计算', 'Softmax', '容错检查'], sub: ['Attention', 'Normalization', 'Verification'] },
+  vision: { title: '感知与系统协作', nodes: ['图像输入', '视觉处理', '系统接口'], sub: ['Image', 'Perception', 'Interface'] },
+  embedded: { title: '连接视觉与硬件', nodes: ['图像采集', '目标检测', '无线传输'], sub: ['Capture', 'Detection', 'Transmission'] },
+};
+const d = data[type] || data.act;
+---
+<figure class:list={['diagram', `diagram-${type}`]}>
+  <svg viewBox="0 0 560 204" role="img" aria-label={`${d.title}：${d.nodes.join('、')}。概念示意，非实验结果。`}>
+    <text x="32" y="42" class="diagram-title">{d.title}</text>
+    <path d="M 172 126 H 202 M 358 126 H 388" class="connector" />
+    <path d="m 195 121 7 5 -7 5 M 381 121 l 7 5 -7 5" class="connector" />
+    {d.nodes.map((label, index) => <g>
+      <rect x={28 + index * 182} y="86" width="144" height="80" rx="6" class:list={['diagram-node', { 'node-active': index === 1 }]} />
+      <text x={100 + index * 182} y="119" text-anchor="middle" class="node-label">{label}</text>
+      <text x={100 + index * 182} y="143" text-anchor="middle" class="node-sub">{d.sub[index]}</text>
+    </g>)}
+  </svg>
+  <figcaption>概念示意 · 非实验截图</figcaption>
+</figure>

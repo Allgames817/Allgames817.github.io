@@ -1,0 +1,12 @@
+---
+import Diagram from './Diagram.astro';
+import projects from '../data/projects.json';
+import { url } from '../data/site';
+interface Props { project: typeof projects[number]; }
+const { project } = Astro.props;
+---
+{project.screenshot ? <figure class="project-screenshot">
+  <img data-screenshot-lang={project.screenshot.srcEn ? 'zh-CN' : undefined} src={url(project.screenshot.src)} alt={project.screenshot.alt} width={project.screenshot.width} height={project.screenshot.height} loading="lazy" decoding="async" />
+  {project.screenshot.srcEn && <img data-screenshot-lang="en" src={url(project.screenshot.srcEn)} alt={project.screenshot.alt} width={project.screenshot.width} height={project.screenshot.height} loading="lazy" decoding="async" />}
+  <figcaption>{project.screenshot.caption}</figcaption>
+</figure> : <Diagram type={project.cover} />}

@@ -1,0 +1,121 @@
+{
+  "books": [
+    {
+      "id": "dubliners",
+      "title": "都柏林人",
+      "author": "詹姆斯·乔伊斯",
+      "readAt": "2026-01",
+      "sourceUrl": "https://www.penguin.co.uk/books/57011/dubliners-by-joyce-james/9780241720202",
+      "quotes": [],
+      "thought": ""
+    },
+    {
+      "id": "antifragile",
+      "title": "反脆弱",
+      "author": "纳西姆·尼古拉斯·塔勒布",
+      "readAt": "2026-07",
+      "sourceUrl": "https://www.penguinrandomhouse.com/books/176227/antifragile-by-nassim-nicholas-taleb/",
+      "quotes": [],
+      "thought": ""
+    },
+    {
+      "id": "atomic-habits",
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "readAt": "2026-09",
+      "sourceUrl": "https://www.penguinrandomhouse.com/books/543993/atomic-habits-by-james-clear/9780735211292/",
+      "quotes": [],
+      "thought": ""
+    },
+    {
+      "id": "birth-of-tragedy",
+      "title": "悲剧的诞生",
+      "author": "弗里德里希·尼采",
+      "readAt": "2026-09",
+      "sourceUrl": "https://www.penguin.co.uk/books/34181/the-birth-of-tragedy-by-nietzsche-friedrich/9780141935072",
+      "quotes": [],
+      "thought": ""
+    }
+  ],
+  "music": [
+    {
+      "title": "克罗地亚狂想曲",
+      "artist": "作曲：Tonči Huljić",
+      "sourceUrl": "https://www.toncihuljic.com/"
+    },
+    {
+      "title": "蓝色多瑙河",
+      "artist": "作曲：约翰·施特劳斯二世",
+      "sourceUrl": "https://www.wienerphilharmoniker.at/en/konzerte/johann-strauss-evening/4766/"
+    },
+    {
+      "title": "天鹅湖",
+      "artist": "作曲：彼得·伊里奇·柴可夫斯基",
+      "sourceUrl": "https://static.roh.org.uk/showings/swan-lake-live-2015/en.pdf"
+    }
+  ],
+  "notes": [
+    {
+      "slug": "berkeley-2025",
+      "title": "2025 暑期 · 加州大学伯克利分校",
+      "period": "2025年暑期",
+      "time": "2025",
+      "description": "从校园钟楼、课程学习，到与朋友走过的湾区，记录一次伯克利暑期交流。",
+      "information": [
+        { "label": "全名", "value": "Zhicheng You" },
+        { "label": "入学年份", "value": "2024" },
+        { "label": "学院", "value": "SSE" },
+        { "label": "专业", "value": "CE" },
+        { "label": "书院", "value": "Diligentia College" },
+        { "label": "项目种类", "value": "Summer Program" },
+        { "label": "参与项目所在院校", "value": "The University of California , Berkeley" },
+        { "label": "项目时间", "value": "2025 Summer" }
+      ],
+      "sections": [
+        {
+          "id": "impressions",
+          "title": "交流印象",
+          "prompt": "请用几句话简述在境外学习过程中印象最深刻/最有意义的时刻。",
+          "paragraphs": ["印象最深刻的是校园里每天会放音乐的钟楼，无论在校园的哪个角落，抬头就能望见。以及在学习之余，和朋友逛校园，去了旧金山的许多著名景点，如金门大桥、渔人码头。最有意义的时刻，是与小组搭档共同完成一个 CPU 的设计作业，虽然投入很多时间与精力，最后完成时感到满满的成就感。"],
+          "portrait": { "src": "/images/life/berkeley-2025/campanile.webp", "alt": "蓝天下的伯克利校园钟楼与周围建筑", "width": 1046, "height": 1398 },
+          "images": [
+            { "src": "/images/life/berkeley-2025/classmates.webp", "alt": "暑期交流期间与同伴的合影", "width": 613, "height": 459 },
+            { "src": "/images/life/berkeley-2025/campus.webp", "alt": "树荫下的加州大学伯克利分校校园标识", "width": 1693, "height": 1266 }
+          ]
+        },
+        {
+          "id": "why-berkeley",
+          "title": "为什么选择伯克利",
+          "paragraphs": ["之前学校邀请过加州大学伯克利分校的老师来学习宣讲，我通过这个机会了解到了加州大学伯克利分校，无论是其高质量的学术水平，还是当地独特的社区文化，都让我对这所大学产生了浓厚的兴趣。刚好加州大学伯克利有暑期项目，就像去亲身体验一下美国大学的学习生活。以及考虑到自己几次到美国游玩，都是去美国东边，这次暑期项目选择伯克利，也是想看看美国的西部的风景。"]
+        },
+        {
+          "id": "preparation",
+          "title": "行前准备与交流大使工作",
+          "paragraphs": [
+            "对于我而言，出行前，我了解了伯克利暑期所开设的相应关课程，并询问港中深教务处能将这些课程的学分转回至本校。同时联系暑期住房，决定与身边一同前往伯克利暑期项目的同学合租。",
+            "作为境外交流大使，我曾帮助同学解决签证被拒的问题，并及时与 OAL 老师联系，帮助被拒签同学二次面签并成功参加暑期项目。"
+          ]
+        },
+        {
+          "id": "learning",
+          "title": "课堂与学习",
+          "paragraphs": ["通过这次暑期项目，我感受到美国大学的教育方式，鼓励学生去尝试，多与同学教授沟通交流。教授很有意思，课堂内容生动，形式多样。TA 们都非常热心，耐心解答问题。通过一个暑期在加州大学伯克利分校的体验，感觉自己对这样的教学模式非常满意。也为以后目标前往美国留学，无论是学习还是生活都打下了一定基础。"]
+        },
+        {
+          "id": "life-in-the-bay",
+          "title": "校园与湾区生活",
+          "paragraphs": ["课间时，我会和朋友一起坐在伯克利校园的草坪上晒太阳思考问题、登上钟楼远眺校园与旧金山湾区以及在充满生机的校园散步。如果学习累了，还能去校园的健身房放松，那里设施齐全、健身氛围浓厚。周末时，会约朋友一起去旧金山游玩，比较著名的景点像是金门大桥，渔人码头，九曲花街等。当然，位于湾区的硅谷也是非常推荐去看看的。当地的计算机氛围浓厚，例如计算机历史博物馆，能让你近距离感受到人类历史上计算机的发展历程。"],
+          "images": [
+            { "src": "/images/life/berkeley-2025/golden-gate.webp", "alt": "旧金山湾区海面上的金门大桥", "width": 596, "height": 447 },
+            { "src": "/images/life/berkeley-2025/chinatown.webp", "alt": "旧金山唐人街的牌楼和街道", "width": 1440, "height": 1080 }
+          ]
+        },
+        {
+          "id": "advice",
+          "title": "给未来交流同学的建议",
+          "paragraphs": ["同时通过这次暑期经历，我也能给未来想去境外学习的同学一些建议。出发前，办理签证是非常重要的一项任务。不仅需要同学们按要求准备好相关文件，而且建议在拿到相关学校所提供的签证资料就尽早去办理，以免发生突发情况（例如受国际形势的影响），导致被拒签，从而无法参加境外交流项目。在参加海外项目时，最重要的就是自己的人身安全，要让身边的亲人朋友知道自己的出行规划，从而能及时联系上自己。最后回国时，要记得处理好相关课程资料，保存好成绩单与课程大纲，以便回到学校之后转学分。"]
+        }
+      ]
+    }
+  ]
+}

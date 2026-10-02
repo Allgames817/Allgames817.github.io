@@ -1,0 +1,6 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { url } from '../data/site';
+import features from '../data/features.json';
+---
+<Layout title="页面未找到" section=""><section class="not-found"><p class="error-code">404</p><h1>这一页还没有写好，<br />或已经搬了位置。</h1><p>{features.blog ? '可以回到首页，或从项目与博客继续浏览。' : '可以回到首页，或从项目与生活继续浏览。'}</p><div class="actions"><a class="button primary" href={url('/')}>返回首页</a><a class="button quiet" href={url(features.blog ? '/blog/' : '/projects/')}>{features.blog ? '阅读博客' : '浏览项目'}</a></div></section></Layout>

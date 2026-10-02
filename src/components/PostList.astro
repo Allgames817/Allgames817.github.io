@@ -1,0 +1,13 @@
+---
+import { posts as allPosts } from '../lib/posts';
+import { url } from '../data/site';
+interface Props { posts?: typeof allPosts; heading?: 'h2' | 'h3'; }
+const { posts = allPosts, heading: Heading = 'h3' } = Astro.props;
+---
+<div class="post-list">
+  {posts.map(({ frontmatter: p }) => <article class="post-row" data-item data-category={p.category} data-search={`${p.title} ${p.description}`}>
+    <div class="post-meta"><span>{p.category}</span>{p.draft && <span class="draft">示例草稿</span>}{p.date && <time datetime={p.date}>{p.date}</time>}</div>
+    <div><Heading><a href={url(`/blog/${p.slug}/`)}>{p.title}</a></Heading><p>{p.description}</p></div>
+    <a href={url(`/blog/${p.slug}/`)} class="read-link" aria-label={`阅读${p.title}`}>阅读<span aria-hidden="true"> ↗</span></a>
+  </article>)}
+</div>

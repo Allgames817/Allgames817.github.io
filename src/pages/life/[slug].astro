@@ -1,0 +1,63 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import life from '../../data/life.json';
+import { url } from '../../data/site';
+
+export function getStaticPaths() {
+  return life.notes.map(note => ({ params: { slug: note.slug }, props: { note } }));
+}
+const { note } = Astro.props;
+---
+<Layout title={note.title} description={note.description} section="/life/">
+  <div class="detail-top"><a class="back-link" href={url('/life/#notes-title')}>返回生活随记</a></div>
+  <header class="detail-heading">
+    <h1>{note.title}</h1>
+    <p><time datetime={note.time}>{note.period}</time></p>
+  </header>
+  <div class="reading-layout">
+    <article class="prose note-body">
+      <dl class="program-information">
+        {note.information.map(item => <div><dt>{item.label}</dt><dd>{item.value}</dd></div>)}
+      </dl>
+      {note.sections.map(section => <section aria-labelledby={section.id}>
+        <h2 id={section.id}>{section.title}</h2>
+        {section.prompt && <p class="source-question">{section.prompt}</p>}
+        <div class:list={{ 'note-opening': Boolean(section.portrait) }}>
+          <div>{section.paragraphs.map(paragraph => <p class="source-paragraph">{paragraph}</p>)}</div>
+          {section.portrait && <figure><img src={url(section.portrait.src)} alt={section.portrait.alt} width={section.portrait.width} height={section.portrait.height} loading="lazy" decoding="async" /></figure>}
+        </div>
+        {section.images && <div class="note-photos">
+          {section.images.map(photo => <figure><img src={url(photo.src)} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" decoding="async" /></figure>)}
+        </div>}
+      </section>)}
+    </article>
+    <aside class="toc">
+      <details open>
+        <summary>文章目录</summary>
+        <nav aria-label="文章目录">{note.sections.map(section => <a href={`#${section.id}`}>{section.title}</a>)}</nav>
+      </details>
+    </aside>
+  </div>
+  <a class="back-link end-link" href={url('/life/#notes-title')}>返回生活随记</a>
+</Layout>
+
+<style>
+  .note-body:lang(zh-CN) { line-height: 1.95; }
+  .program-information { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; margin: 0 0 36px; }
+  .program-information dt { color: var(--muted); font-size: 13px; }
+  .program-information dd { margin: 2px 0 0; font-size: 15px; overflow-wrap: anywhere; }
+  .note-body .source-question { font-size: 14px; color: var(--muted); }
+  .note-opening { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; align-items: start; margin-top: 20px; }
+  .note-opening p:first-child { margin-top: 0; }
+  .note-body .note-opening figure { margin: 0; }
+  .note-photos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 28px; }
+  .note-body .note-photos figure { margin: 0; }
+  .note-body img { display: block; width: 100%; height: auto; }
+  @media (max-width: 768px) {
+    .program-information { gap: 16px 20px; margin-bottom: 28px; }
+    .program-information div:nth-last-child(2) { grid-column: 1 / -1; }
+    .note-opening { grid-template-columns: 1fr; gap: 16px; }
+    .note-opening figure { max-width: 360px; }
+    .note-photos { grid-template-columns: 1fr; gap: 20px; margin-top: 24px; }
+  }
+</style>

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+.impeccable/
+/PRODUCT.md
+/QA.md
+private-input/
+.env
+.env.*
+!.env.example
+*.log
+artifacts/

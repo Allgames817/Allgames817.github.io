@@ -1,0 +1,11 @@
+---
+interface Props { categories: string[]; search?: boolean; }
+const { categories, search = false } = Astro.props;
+---
+<div class="filter-tools" hidden data-filter-tools>
+  {search && <div class="search-field"><label for="article-search">搜索文章</label><input id="article-search" type="search" placeholder="输入标题或摘要关键词" autocomplete="off" /></div>}
+  <div class="filters" role="group" aria-label="按类别筛选">
+    {['全部', ...categories].map((category, index) => <button type="button" data-filter={category} aria-pressed={index === 0 ? 'true' : 'false'}>{category}</button>)}
+  </div>
+  <p class="result-count" role="status" aria-live="polite" data-result-count></p>
+</div>
