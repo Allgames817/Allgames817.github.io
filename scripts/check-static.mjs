@@ -16,7 +16,7 @@ const blogSources = await Promise.all((await readdir('src/content/blog')).filter
   return { slug: frontmatter.match(/^slug:\s*(.+)$/m)[1].trim(), draft: /^draft:\s*true\s*$/m.test(frontmatter) };
 }));
 const publishedPosts = features.blog ? blogSources.filter(post => !post.draft) : [];
-assert.equal(html.length, 4 + Number(features.blog) + projects.length + publishedPosts.length + life.notes.length + 1, 'Expected enabled main pages, project details, published articles, life notes and 404');
+assert.equal(html.length, 4 + Number(features.blog) + projects.length + publishedPosts.length + life.notes.length + 2, 'Expected enabled main pages, project details, published articles, life notes, certificate and 404');
 if (!features.blog) assert.ok(!all.some(file => path.relative(root, file).replaceAll('\\', '/').startsWith('blog/')), 'Disabled blog must not generate public files');
 for (const post of blogSources.filter(post => post.draft)) assert.ok(!html.some(file => path.relative(root, file).replaceAll('\\', '/') === `blog/${post.slug}/index.html`), `Draft must not be published: ${post.slug}`);
 let checkedLinks = 0;

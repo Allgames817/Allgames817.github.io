@@ -8,7 +8,7 @@ const blogSources = await Promise.all((await readdir('src/content/blog')).filter
   const frontmatter = (await readFile(`src/content/blog/${file}`, 'utf8')).split('---')[1];
   return { slug: frontmatter.match(/^slug:\s*(.+)$/m)[1].trim(), draft: /^draft:\s*true\s*$/m.test(frontmatter) };
 }));
-const routes = ['/', '/projects/', ...projects.map(project => `/projects/${project.slug}/`), '/life/', ...life.notes.map(note => `/life/${note.slug}/`), '/about/', ...(features.blog ? ['/blog/', ...blogSources.filter(post => !post.draft).map(post => `/blog/${post.slug}/`)] : [])];
+const routes = ['/', '/projects/', ...projects.map(project => `/projects/${project.slug}/`), '/life/', ...life.notes.map(note => `/life/${note.slug}/`), '/about/', '/about/ambassador-certificate-2025/', ...(features.blog ? ['/blog/', ...blogSources.filter(post => !post.draft).map(post => `/blog/${post.slug}/`)] : [])];
 for (const route of routes) {
   for (let attempt = 0; attempt < 2; attempt++) {
     const res = await fetch(origin + route, { signal: AbortSignal.timeout(15000) });

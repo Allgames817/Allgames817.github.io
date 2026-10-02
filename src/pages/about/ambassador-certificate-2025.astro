@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { url } from '../../data/site';
+---
+<Layout title="境外交流大使证明信" section="/about/" description="2025 年境外交流大使证明信，由香港中文大学（深圳）学术交流处出具。">
+  <div class="certificate-page">
+    <div class="detail-top"><a class="back-link" href={url('/about/#exchange-title')}>返回关于</a></div>
+    <header class="detail-heading">
+      <h1>境外交流大使证明信</h1>
+      <p>香港中文大学（深圳）学术交流处 <span aria-hidden="true">·</span> <time datetime="2025-09-03">2025 年 9 月 3 日</time></p>
+    </header>
+    <figure>
+      <img class="certificate-image" src={url('/images/experience/study-abroad-ambassador-2025.webp')} alt="2025 年境外交流大使证明信，包含学校印章，学号已遮挡" width="1654" height="2339" decoding="async" fetchpriority="high" />
+      <figcaption>证明信公开展示版本，学号已遮挡。</figcaption>
+    </figure>
+    <a class="back-link end-link" href={url('/about/#exchange-title')}>返回关于</a>
+  </div>
+</Layout>
+
+<style>
+  .certificate-page { max-width: 840px; margin-inline: auto; }
+  .certificate-image { display: block; width: 100%; height: auto; background: #fff; border: 1px solid var(--line); }
+  figcaption { margin-top: 14px; font-size: 13px; color: var(--muted); }
+</style>
