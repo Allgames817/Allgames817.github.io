@@ -6,6 +6,8 @@ const data: Record<string, { title: string; nodes: string[]; sub: string[] }> = 
   attention: { title: '计算与可靠性', nodes: ['注意力计算', 'Softmax', '容错检查'], sub: ['Attention', 'Normalization', 'Verification'] },
   vision: { title: '感知与系统协作', nodes: ['图像输入', '视觉处理', '系统接口'], sub: ['Image', 'Perception', 'Interface'] },
   embedded: { title: '连接视觉与硬件', nodes: ['图像采集', '目标检测', '无线传输'], sub: ['Capture', 'Detection', 'Transmission'] },
+  multiview: { title: '从多视角到三维', nodes: ['相机与深度', '坐标变换', '点云融合'], sub: ['RGB-D + pose', 'Camera to world', 'Fused geometry'] },
+  nerf: { title: '沿射线合成视图', nodes: ['相机射线', '辐射场', '体渲染'], sub: ['Ray sampling', 'Density + color', 'Novel view'] },
 };
 const d = data[type] || data.act;
 ---

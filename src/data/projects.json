@@ -97,6 +97,171 @@
     ]
   },
   {
+    "slug": "multiview-geometry",
+    "date": "2026-10",
+    "title": "多视图几何学习与实验",
+    "category": "世界模型",
+    "kind": "学习实验",
+    "summary": "从两视图三角化与 COLMAP 重建，到 RGB-D 融合和世界射线接口，检查像素残差、深度尺度与三维几何的关系。",
+    "tags": [
+      "Multi-View Geometry",
+      "COLMAP",
+      "RGB-D",
+      "Camera Rays"
+    ],
+    "status": "已整理七天几何实验与证据",
+    "cover": "multiview",
+    "featured": false,
+    "overview": "世界模型学习路线第二周：围绕三角化、特征匹配、稀疏重建、RGB-D 反投影和世界射线，整理七篇笔记与本地实验记录，为下一周 NeRF 的相机接口打基础。",
+    "background": "图像上的拟合误差很小，并不意味着三维位置准确。项目从已知相机与合成真值出发，逐步加入真实匹配、COLMAP 模型和给定位姿的 RGB-D 数据，区分实现自洽、观测一致性与外部几何精度。",
+    "work": [
+      "构造 DLT 方程并用 SVD 三角化，通过基线与像素噪声对照，检查有限解、正深度、重投影误差和三维真值误差。",
+      "整理 SIFT、ratio test 与 F/E RANSAC 的匹配流程，运行 COLMAP 稀疏重建，并读取相机、位姿和 Track 重算投影。",
+      "核对 NumPy 与 Open3D 的同像素 RGB-D 反投影，使用给定位姿合并五帧点云，并结合覆盖率检查跨帧深度残差。",
+      "定义像素到世界单位射线的接口，固定相机轴、位姿方向和深度单位，用错误对照验证轴向深度 Z 与射线距离的区别。"
+    ],
+    "method": "几何流程分成两条：RGB 路线从对应点、相对位姿走向 COLMAP SfM；RGB-D 路线从轴向米制深度反投影，再用给定 camera-to-world 变换到世界坐标。后者没有估计轨迹。",
+    "methodDetails": [
+      "三角化对照固定 300 个合成点，深度约 4–8 m、seed = 20261006；1 px 噪声条件各重复 10 次，两种基线共用配对噪声。指标先取每次试验的点误差中位数，再跨试验汇总。",
+      "COLMAP 在同一组 128 张 South Building 图像上比较 4096 / 2048 特征上限；RGB-D 使用 Redwood 五帧及 LOG 给定位姿。两个场景的世界坐标与尺度没有对齐。",
+      "单位世界射线写为 r(s) = C + s·d，其中 d 为单位方向；轴向深度 Z 对应 s = Z·‖R K⁻¹[u,v,1]ᵀ‖。射线原点、方向与距离约定需同时一致。"
+    ],
+    "results": "相同 1 px 噪声下，基线从 0.5 m 缩短到 0.05 m，三维误差约增大 10 倍，而重投影误差几乎不变。这一合成对照说明：小像素残差不能单独证明深度准确。",
+    "resultTable": {
+      "caption": "300 个合成点 · 1 px 噪声 · 10 次重复；每次点误差中位数的均值 ± 试验间样本标准差",
+      "columns": [
+        "基线 (m)",
+        "三维误差 (m)",
+        "重投影误差 (px)"
+      ],
+      "rows": [
+        [
+          "0.5",
+          "0.07930 ± 0.00386",
+          "0.48544 ± 0.04297"
+        ],
+        [
+          "0.05",
+          "0.79337 ± 0.04751",
+          "0.48544 ± 0.04297"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "COLMAP 的 base4096 运行将 128/128 张图注册到同一子模型，得到 40,692 个点和 241,106 条观测；按点等权平均的存储 ERROR 为 0.76347 px。这是模型内部拟合指标。",
+      "给定位姿下，五帧 RGB-D 的 1,340,711 个原始点经 0.02 m 体素降采样后剩 28,218 点。4→0 检查覆盖目标有效像素的 89.22%，重叠绝对深度残差中位数为 0.005479 m；该数值不代表全场景三维精度。",
+      "在 2,048 个固定像素的射线诊断中，把 Z 直接当作单位射线距离，使端点三维变化中位数达到 0.123180 m，同相机像素残差仍接近零，再次暴露仅检查回投的局限。"
+    ],
+    "next": "本周未训练 NeRF、未实现完整 SLAM，也没有外部三维或轨迹真值。公开仓库保留笔记、精选图和轻量结果，未附完整运行脚本与大型数据。后续进入体渲染前，需要明确视角划分、畸变处理、分辨率与内参同步，以及 near/far 的距离约定。",
+    "links": [
+      {
+        "label": "GitHub · 多视图几何学习记录",
+        "url": "https://github.com/Allgames817/WM_Week2_MultiView_Geometry"
+      },
+      {
+        "label": "两视图三角化与基线对照",
+        "url": "https://github.com/Allgames817/WM_Week2_MultiView_Geometry/blob/main/01_Two_View_Triangulation.md"
+      },
+      {
+        "label": "COLMAP 稀疏重建",
+        "url": "https://github.com/Allgames817/WM_Week2_MultiView_Geometry/blob/main/03_COLMAP_Sparse_Reconstruction.md"
+      },
+      {
+        "label": "多帧 RGB-D 与跨帧检查",
+        "url": "https://github.com/Allgames817/WM_Week2_MultiView_Geometry/blob/main/06_MultiFrame_RGBD_Fusion.md"
+      },
+      {
+        "label": "世界射线与 NeRF 接口",
+        "url": "https://github.com/Allgames817/WM_Week2_MultiView_Geometry/blob/main/07_Ray_Interface_and_NeRF_Bridge.md"
+      }
+    ],
+    "posts": []
+  },
+  {
+    "slug": "neural-radiance-fields",
+    "date": "2026-10",
+    "title": "NeRF 神经辐射场学习与实验",
+    "category": "世界模型",
+    "kind": "学习实验",
+    "summary": "从相机射线到有限区间体渲染，在 Tiny-NeRF 场景训练神经场，并用冻结模型与匹配训练区分采样和学习的影响。",
+    "tags": [
+      "NeRF",
+      "体渲染",
+      "新视角合成"
+    ],
+    "status": "已完成训练、采样对照与指标复核",
+    "cover": "nerf",
+    "featured": false,
+    "overview": "World Model 学习路线第三周的实验记录，串联相机约定、世界射线、位置编码、神经场与图像监督。公开仓库保存专题说明、原始报告、浮点渲染结果和指标校验工具；本页依据已有记录整理。",
+    "background": "NeRF 通过可微体渲染把三维位置、观察方向与二维图像联系起来。本项目关注相机和距离参数是否一致、保留视角的图像质量如何验证，以及分层采样的收益来自数值积分还是网络学习。",
+    "work": [
+      "统一 OpenGL / OpenCV 相机约定、原图整数像素和单位世界射线，区分轴向深度与沿射线距离。",
+      "串联位置与方向编码、密度与颜色分支、有限区间体渲染和 RGB 损失，记录固定批次拟合与多视角训练。",
+      "固定训练与验证划分，重新加载 LAST 权重评估全部保留视角，并从浮点结果复核 MSE 与 PSNR。",
+      "在等查询预算下比较冻结神经场的采样方式，再用匹配初始化和训练批次的双网络实验检查学习影响。"
+    ],
+    "method": "位置与方向编码输入 MLP，输出密度 σ 与颜色 c；有限区间内按 α = 1 − exp(−σΔ) 和透过率合成 RGB。模型用训练射线的 RGB 均方误差更新参数，不使用真实表面深度监督。",
+    "methodDetails": [
+      "Tiny-NeRF 单场景包含 106 张 100 × 100 图像，固定为 92 个训练视角和 14 个验证视角。验证取原图 stride=2 网格，每视角 2,500 条射线；内参保留原图分辨率。",
+      "基础网络为 4 层、宽度 64、24,420 个参数；Adam 学习率 5e-4、batch 512、seed 2026，执行 3,000 次更新。训练每射线在 64 个有限单元内随机查询，评估使用固定中点。",
+      "冻结对照每条射线均计 64 次场查询。uniform_union 与 hierarchical 都先查询 16 个粗点，再查询 16 个粗点与 32 个新增点的合并集合；分层分布混合 5% 均匀探索。"
+    ],
+    "results": "基础模型在保留验证网格上达到 22.770551 dB PSNR。冻结分层采样为 22.576203 dB，优于对应 uniform_union 的 22.325057 dB，但没有超过基础 64 点均匀中点；这些结果只支持本次场景与预算下的差异。",
+    "resultTable": {
+      "caption": "冻结同一神经场 · 每射线 64 次查询，14 个验证视角的 stride=2 网格",
+      "columns": [
+        "采样条件",
+        "全验证 MSE ↓",
+        "PSNR / dB ↑"
+      ],
+      "rows": [
+        [
+          "64 点均匀中点",
+          "0.00528378202",
+          "22.770551"
+        ],
+        [
+          "uniform_union",
+          "0.00585456074",
+          "22.325057"
+        ],
+        [
+          "hierarchical",
+          "0.00552560304",
+          "22.576203"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "指标先累计全部 105,000 个 RGB 标量的平方误差，再计算一次 MSE 和 PSNR，不是逐视角 PSNR 的平均值。基础评估重载探针的最大 RGB 差为 0，评估期间参数保持不变。",
+      "双网络从基础 LAST 参数分别初始化，额外执行匹配的 200 步训练；uniform_union 与 hierarchical 的 PSNR 分别为 22.214360 和 22.343953 dB，均未超过基础模型。冻结实验与匹配训练回答不同问题，不能合并为普遍性能提升。"
+    ],
+    "next": "当前证据限于单场景、单种子与有限预算，验证集也不是未使用的最终测试集。后续可补充多种子、更多场景与独立测试；3DGS 目前仅讨论接口迁移。公开仓库支持结果审阅和指标复核，完整训练复现依赖未分发的原始实现与数据。",
+    "links": [
+      {
+        "label": "GitHub · NeRF 研究记录",
+        "url": "https://github.com/Allgames817/WM_Week3_Neural_Radiance_Fields"
+      },
+      {
+        "label": "训练配置与新视角评估",
+        "url": "https://github.com/Allgames817/WM_Week3_Neural_Radiance_Fields/blob/main/05_Training_and_Novel_View_Evaluation.md"
+      },
+      {
+        "label": "分层采样与受控对照",
+        "url": "https://github.com/Allgames817/WM_Week3_Neural_Radiance_Fields/blob/main/06_Hierarchical_Sampling_and_Controlled_Comparisons.md"
+      },
+      {
+        "label": "基础模型原始评估报告",
+        "url": "https://github.com/Allgames817/WM_Week3_Neural_Radiance_Fields/blob/main/results/training/evaluation/evaluation_report.json"
+      },
+      {
+        "label": "归档证据与来源索引",
+        "url": "https://github.com/Allgames817/WM_Week3_Neural_Radiance_Fields/blob/main/SOURCE_INDEX.md"
+      }
+    ],
+    "posts": []
+  },
+  {
     "slug": "flow-matching",
     "date": "2026-09",
     "title": "Flow Matching 学习与实验",
