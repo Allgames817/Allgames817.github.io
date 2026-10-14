@@ -1,6 +1,7 @@
 [
   {
     "slug": "gaussian-splatting",
+    "addedOrder": 10,
     "date": "2026-10",
     "title": "3D Gaussian Splatting 学习与实验",
     "category": "世界模型",
@@ -96,6 +97,7 @@
   },
   {
     "slug": "neural-radiance-fields",
+    "addedOrder": 9,
     "date": "2026-10",
     "title": "NeRF 神经辐射场学习与实验",
     "category": "世界模型",
@@ -180,6 +182,7 @@
   },
   {
     "slug": "multiview-geometry",
+    "addedOrder": 8,
     "date": "2026-10",
     "title": "多视图几何学习与实验",
     "category": "世界模型",
@@ -261,6 +264,7 @@
   },
   {
     "slug": "vggt",
+    "addedOrder": 11,
     "date": "2026-10",
     "title": "VGGT 前馈几何学习与实验",
     "category": "世界模型",
@@ -351,6 +355,7 @@
   },
   {
     "slug": "flow-matching",
+    "addedOrder": 7,
     "date": "2026-09",
     "title": "Flow Matching 学习与实验",
     "category": "机器人学习",
@@ -437,6 +442,7 @@
   },
   {
     "slug": "diffusion-policy",
+    "addedOrder": 6,
     "date": "2026-09",
     "title": "Diffusion Policy 学习与消融",
     "category": "机器人学习",
@@ -536,6 +542,7 @@
   },
   {
     "slug": "act",
+    "addedOrder": 1,
     "date": "2026-09",
     "title": "ACT 复现与分析",
     "category": "机器人学习",
@@ -633,6 +640,7 @@
   },
   {
     "slug": "attention-resilience",
+    "addedOrder": 3,
     "date": "2026-07",
     "dateEnd": "2026-09",
     "title": "FlashAttention / Softmax 容错分析与验证",
@@ -702,6 +710,7 @@
   },
   {
     "slug": "robomaster-vision",
+    "addedOrder": 2,
     "hiddenSections": ["method", "results", "next", "links"],
     "date": "2025-07",
     "ongoing": true,
@@ -733,6 +742,7 @@
   },
   {
     "slug": "embedded-vision",
+    "addedOrder": 4,
     "date": "2026-08",
     "title": "电赛视觉识别与无线图传",
     "category": "工程实践",
@@ -785,6 +795,7 @@
   },
   {
     "slug": "credit-transfer",
+    "addedOrder": 5,
     "date": "2026-04",
     "group": "tools",
     "website": "https://lgu-cts.up.railway.app/",

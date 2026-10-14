@@ -48,6 +48,8 @@ npm run preview
 
 项目可用 `hiddenSections` 暂时隐藏 `method`、`results`、`next`、`links` 区块，目录同步收起，原始内容仍保留在数据中。
 
+项目排序先按 `date` 月份倒序；同月按 `addedOrder` 倒序，越新提供的项目越靠前。`addedOrder` 是唯一的正整数新增序号，不是实验日期；新增项目必须使用当前最大值加一，不通过改月份或移动 JSON 条目调序。同批项目沿用用户指定的相对顺序，给需要靠前的项目更大的序号。精选与更多探索分别使用同一排序规则，分类筛选只隐藏不匹配项目，保持「全部」页的相对顺序。用户后续明确要求调序时再调整序号。当前机器人学习顺序为 Flow Matching → Diffusion Policy → ACT。
+
 ## GitHub Pages
 
 默认使用 `site=https://allgames817.github.io` 和 `base=/`。在仓库 Settings → Pages 中将 Source 设为 GitHub Actions，然后在 Actions 中手动运行 **Deploy static site to GitHub Pages**。

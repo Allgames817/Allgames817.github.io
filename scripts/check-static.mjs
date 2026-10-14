@@ -9,6 +9,22 @@ const all = await files(root);
 const allowedDocuments = new Set(['documents/study-abroad-ambassador-2025-public.pdf']);
 const html = all.filter(f => f.endsWith('.html'));
 const projects = JSON.parse(await readFile('src/data/projects.json', 'utf8'));
+assert.ok(projects.every(project => Number.isSafeInteger(project.addedOrder) && project.addedOrder > 0), 'Each project needs a positive addedOrder; new projects use the current maximum + 1');
+assert.equal(new Set(projects.map(project => project.addedOrder)).size, projects.length, 'Project addition orders must be unique');
+const projectIndex = await readFile(path.join(root, 'projects/index.html'), 'utf8');
+for (const [group, featured] of [['featured-projects', true], ['more-projects', false]]) {
+  const section = projectIndex.match(new RegExp(`<section[^>]*aria-labelledby="${group}"[^>]*>([\\s\\S]*?)</section>`))?.[1];
+  assert.ok(section, `Missing project group: ${group}`);
+  const hrefs = [...section.matchAll(/class="cover-link" href="([^"]+)"/g)].map(match => match[1]);
+  const expected = projects.filter(project => project.featured === featured);
+  assert.deepEqual([...hrefs].sort(), expected.map(project => `${base}/projects/${project.slug}/`).sort(), `${group}: project membership`);
+  const ordered = hrefs.map(href => expected.find(project => href === `${base}/projects/${project.slug}/`));
+  for (let index = 1; index < ordered.length; index++) {
+    const previous = ordered[index - 1], current = ordered[index];
+    const previousMonth = previous.date || '', currentMonth = current.date || '';
+    assert.ok(previousMonth > currentMonth || (previousMonth === currentMonth && previous.addedOrder > current.addedOrder), `${group}: newer months and newer same-month additions must appear first (${previous.slug}, ${current.slug})`);
+  }
+}
 const life = JSON.parse(await readFile('src/data/life.json', 'utf8'));
 const features = JSON.parse(await readFile('src/data/features.json', 'utf8'));
 const blogSources = await Promise.all((await readdir('src/content/blog')).filter(file => file.endsWith('.md')).map(async file => {
