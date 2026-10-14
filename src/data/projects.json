@@ -1,102 +1,5 @@
 [
   {
-    "slug": "act",
-    "date": "2026-09",
-    "title": "ACT 复现与分析",
-    "category": "机器人学习",
-    "kind": "论文复现",
-    "summary": "在 Transfer Cube 仿真任务中复现 ACT，对比时间聚合与动作块长度，并追踪高成功率背后的局部失败区域。",
-    "tags": [
-      "ACT",
-      "模仿学习",
-      "Transformer"
-    ],
-    "status": "已完成复现、消融与失败分析",
-    "cover": "act",
-    "featured": false,
-    "overview": "这是 VLA 学习路线第一周的研究记录，围绕 Action Chunking with Transformers（ACT）整理论文、模型结构、代码映射与仿真实验。公开仓库汇总已有评估日志和 CSV；本页结果来自这些记录，整理笔记时未重新训练模型。",
-    "background": "逐步预测单个动作的行为克隆容易在长时序操作中累积误差。ACT 一次预测一段动作，并可通过时间聚合融合重叠预测。本项目关注：动作块长度如何影响双臂移交任务，时间聚合能改善什么，以及平均成功率会遗漏哪些失败。",
-    "work": [
-      "梳理行为克隆、动作分块、CVAE 与 DETR 风格 Transformer，并将数据加载、策略网络、损失计算和闭环评估对应到代码模块。",
-      "在 MuJoCo + dm_control 的 sim_transfer_cube_scripted 任务中复现 ACT，使用 50 条脚本示范，以固定划分种子按 80/20 分为训练集与验证集。",
-      "控制数据、模型和训练配置，对 k = 1、20、50、100 做动作块长度消融，并在相同的 50 个评估初始位姿上对比有无时间聚合。",
-      "追踪唯一未被时间聚合修复的 rollout 33，整理固定位置的 10 次复测与附近 7 × 7 网格评估，区分总体表现与空间泛化弱点。"
-    ],
-    "method": "策略输入为 top 相机图像和 14 维关节状态，输出 k 个 14 维关节动作。ResNet18 提取视觉特征，Transformer 编解码器预测动作块；训练时 CVAE 编码示范动作得到潜变量，推理时将潜变量置零。",
-    "results": "主实验 k = 100 时，时间聚合将成功率从 42/50（84%）提高到 49/50（98%），增加 14 个百分点；平均回报从 555.24 提高到 604.76。动作块消融显示，在本次设置下，无时间聚合的成功率随 k 增大而上升。",
-    "next": "结果限于单个仿真任务与当前训练、评估种子，未验证真实机器人、人类示范数据或插入任务。失败区域属于训练采样范围内的边界泛化弱点，不能称为严格的分布外失败。下一步可扩展多种子与更密集的位置扫描，并对比 Diffusion Policy 的动作生成和空间覆盖。",
-    "links": [
-      {
-        "label": "GitHub · ACT 研究记录",
-        "url": "https://github.com/Allgames817/Week01_ACT"
-      },
-      {
-        "label": "复现配置与评估协议",
-        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/04_Reproduction.md"
-      },
-      {
-        "label": "动作块长度消融报告",
-        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/06_Chunk_Size_Ablation.md"
-      },
-      {
-        "label": "失败分析与区域分布图",
-        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/05_Failure_Analysis.md"
-      },
-      {
-        "label": "原始评估日志与 CSV",
-        "url": "https://github.com/Allgames817/Week01_ACT/tree/main/results"
-      }
-    ],
-    "posts": [
-      "act-data-flow",
-      "act-to-diffusion"
-    ],
-    "methodDetails": [
-      "主实验：k = 100，batch size = 2（8 GB 显存限制），hidden dimension = 512，feedforward dimension = 3200，KL 权重 = 10，学习率 = 1e-5，训练 2000 epochs，训练种子 = 0。",
-      "每回合 400 步，控制间隔 0.02 s；k = 100 对应 2 s 预测窗口。无时间聚合时整块执行；有时间聚合时每 20 ms 重新预测，并对重叠动作做指数加权融合。",
-      "按最低验证损失选择 checkpoint，评估种子固定为 1000；最高奖励达到 4 视为成功。下表为同一组 50 个初始位姿的任务成功率。"
-    ],
-    "resultTable": {
-      "caption": "动作块长度消融 · 每种设置评估 50 个相同初始位姿",
-      "columns": [
-        "动作块 k",
-        "预测窗口",
-        "无时间聚合",
-        "有时间聚合"
-      ],
-      "rows": [
-        [
-          "1",
-          "0.02 s",
-          "0%",
-          "0%"
-        ],
-        [
-          "20",
-          "0.40 s",
-          "32%",
-          "64%"
-        ],
-        [
-          "50",
-          "1.00 s",
-          "72%",
-          "74%"
-        ],
-        [
-          "100",
-          "2.00 s",
-          "84%",
-          "98%"
-        ]
-      ]
-    },
-    "resultDetails": [
-      "失败分析：rollout 33 位于训练采样范围的左下边界附近，固定该位置复测为 0/10 成功。附近 49 个网格点中，34 个完全成功、6 个部分完成、9 个奖励为零；另行重放的原失败位置不计入这 49 个点。",
-      "关键认识：时间上的鲁棒性不等于空间泛化；k = 1 即使验证损失较低，闭环成功率仍为 0%。因此需要同时检查任务成功率、状态空间覆盖与失败轨迹。"
-    ]
-  },
-  {
     "slug": "gaussian-splatting",
     "date": "2026-10",
     "title": "3D Gaussian Splatting 学习与实验",
@@ -630,6 +533,103 @@
       }
     ],
     "posts": []
+  },
+  {
+    "slug": "act",
+    "date": "2026-09",
+    "title": "ACT 复现与分析",
+    "category": "机器人学习",
+    "kind": "论文复现",
+    "summary": "在 Transfer Cube 仿真任务中复现 ACT，对比时间聚合与动作块长度，并追踪高成功率背后的局部失败区域。",
+    "tags": [
+      "ACT",
+      "模仿学习",
+      "Transformer"
+    ],
+    "status": "已完成复现、消融与失败分析",
+    "cover": "act",
+    "featured": false,
+    "overview": "这是 VLA 学习路线第一周的研究记录，围绕 Action Chunking with Transformers（ACT）整理论文、模型结构、代码映射与仿真实验。公开仓库汇总已有评估日志和 CSV；本页结果来自这些记录，整理笔记时未重新训练模型。",
+    "background": "逐步预测单个动作的行为克隆容易在长时序操作中累积误差。ACT 一次预测一段动作，并可通过时间聚合融合重叠预测。本项目关注：动作块长度如何影响双臂移交任务，时间聚合能改善什么，以及平均成功率会遗漏哪些失败。",
+    "work": [
+      "梳理行为克隆、动作分块、CVAE 与 DETR 风格 Transformer，并将数据加载、策略网络、损失计算和闭环评估对应到代码模块。",
+      "在 MuJoCo + dm_control 的 sim_transfer_cube_scripted 任务中复现 ACT，使用 50 条脚本示范，以固定划分种子按 80/20 分为训练集与验证集。",
+      "控制数据、模型和训练配置，对 k = 1、20、50、100 做动作块长度消融，并在相同的 50 个评估初始位姿上对比有无时间聚合。",
+      "追踪唯一未被时间聚合修复的 rollout 33，整理固定位置的 10 次复测与附近 7 × 7 网格评估，区分总体表现与空间泛化弱点。"
+    ],
+    "method": "策略输入为 top 相机图像和 14 维关节状态，输出 k 个 14 维关节动作。ResNet18 提取视觉特征，Transformer 编解码器预测动作块；训练时 CVAE 编码示范动作得到潜变量，推理时将潜变量置零。",
+    "results": "主实验 k = 100 时，时间聚合将成功率从 42/50（84%）提高到 49/50（98%），增加 14 个百分点；平均回报从 555.24 提高到 604.76。动作块消融显示，在本次设置下，无时间聚合的成功率随 k 增大而上升。",
+    "next": "结果限于单个仿真任务与当前训练、评估种子，未验证真实机器人、人类示范数据或插入任务。失败区域属于训练采样范围内的边界泛化弱点，不能称为严格的分布外失败。下一步可扩展多种子与更密集的位置扫描，并对比 Diffusion Policy 的动作生成和空间覆盖。",
+    "links": [
+      {
+        "label": "GitHub · ACT 研究记录",
+        "url": "https://github.com/Allgames817/Week01_ACT"
+      },
+      {
+        "label": "复现配置与评估协议",
+        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/04_Reproduction.md"
+      },
+      {
+        "label": "动作块长度消融报告",
+        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/06_Chunk_Size_Ablation.md"
+      },
+      {
+        "label": "失败分析与区域分布图",
+        "url": "https://github.com/Allgames817/Week01_ACT/blob/main/05_Failure_Analysis.md"
+      },
+      {
+        "label": "原始评估日志与 CSV",
+        "url": "https://github.com/Allgames817/Week01_ACT/tree/main/results"
+      }
+    ],
+    "posts": [
+      "act-data-flow",
+      "act-to-diffusion"
+    ],
+    "methodDetails": [
+      "主实验：k = 100，batch size = 2（8 GB 显存限制），hidden dimension = 512，feedforward dimension = 3200，KL 权重 = 10，学习率 = 1e-5，训练 2000 epochs，训练种子 = 0。",
+      "每回合 400 步，控制间隔 0.02 s；k = 100 对应 2 s 预测窗口。无时间聚合时整块执行；有时间聚合时每 20 ms 重新预测，并对重叠动作做指数加权融合。",
+      "按最低验证损失选择 checkpoint，评估种子固定为 1000；最高奖励达到 4 视为成功。下表为同一组 50 个初始位姿的任务成功率。"
+    ],
+    "resultTable": {
+      "caption": "动作块长度消融 · 每种设置评估 50 个相同初始位姿",
+      "columns": [
+        "动作块 k",
+        "预测窗口",
+        "无时间聚合",
+        "有时间聚合"
+      ],
+      "rows": [
+        [
+          "1",
+          "0.02 s",
+          "0%",
+          "0%"
+        ],
+        [
+          "20",
+          "0.40 s",
+          "32%",
+          "64%"
+        ],
+        [
+          "50",
+          "1.00 s",
+          "72%",
+          "74%"
+        ],
+        [
+          "100",
+          "2.00 s",
+          "84%",
+          "98%"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "失败分析：rollout 33 位于训练采样范围的左下边界附近，固定该位置复测为 0/10 成功。附近 49 个网格点中，34 个完全成功、6 个部分完成、9 个奖励为零；另行重放的原失败位置不计入这 49 个点。",
+      "关键认识：时间上的鲁棒性不等于空间泛化；k = 1 即使验证损失较低，闭环成功率仍为 0%。因此需要同时检查任务成功率、状态空间覆盖与失败轨迹。"
+    ]
   },
   {
     "slug": "attention-resilience",
