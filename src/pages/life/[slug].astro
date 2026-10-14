@@ -21,7 +21,6 @@ const { note } = Astro.props;
       </dl>
       {note.sections.map(section => <section aria-labelledby={section.id}>
         <h2 id={section.id}>{section.title}</h2>
-        {section.prompt && <p class="source-question">{section.prompt}</p>}
         <div class:list={{ 'note-opening': Boolean(section.portrait) }}>
           <div>{section.paragraphs.map(paragraph => <p class="source-paragraph">{paragraph}</p>)}</div>
           {section.portrait && <figure><img src={url(section.portrait.src)} alt={section.portrait.alt} width={section.portrait.width} height={section.portrait.height} loading="lazy" decoding="async" /></figure>}
@@ -46,7 +45,6 @@ const { note } = Astro.props;
   .program-information { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; margin: 0 0 36px; }
   .program-information dt { color: var(--muted); font-size: 13px; }
   .program-information dd { margin: 2px 0 0; font-size: 15px; overflow-wrap: anywhere; }
-  .note-body .source-question { font-size: 14px; color: var(--muted); }
   .note-opening { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; align-items: start; margin-top: 20px; }
   .note-opening p:first-child { margin-top: 0; }
   .note-body .note-opening figure { margin: 0; }
