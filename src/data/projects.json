@@ -262,6 +262,191 @@
     "posts": []
   },
   {
+    "slug": "gaussian-splatting",
+    "date": "2026-10",
+    "title": "3D Gaussian Splatting 学习与实验",
+    "category": "世界模型",
+    "kind": "学习实验",
+    "summary": "从显式高斯投影与遮挡合成，到合成多视角拟合、受控分裂和冻结重放，检查场景参数、结构编辑与图像误差的关系。",
+    "tags": [
+      "3DGS",
+      "gsplat",
+      "可微渲染",
+      "新视角合成"
+    ],
+    "status": "已完成合成拟合、结构对照与独立验证",
+    "cover": "gaussian",
+    "featured": false,
+    "overview": "世界模型学习路线第四周：承接 NeRF 的相机与图像监督接口，将场景表示改为显式三维高斯，整理七个专题及原始结果。本页依据已有实验记录，展示小型合成任务中的表示、渲染、优化与验证链路。",
+    "background": "高斯的位置、旋转、尺度、不透明度与颜色共同决定像素；增删高斯还会改变优化器状态。项目关注图像误差如何更新场景，以及结构编辑后的收益是否来自后续优化。",
+    "work": [
+      "串联三维协方差、相机投影、二维椭圆、深度排序、逐像素 alpha 与背景合成，区分理想 NumPy 接口和 gsplat 生产光栅化。",
+      "在同初始化、相机顺序与更新步数下，对比仅颜色优化与五组参数联合优化，并在保留视角评估。",
+      "以固定数量续训为对照实施受控分裂，追踪参数行身份，保留旧行 Adam 历史并清零新行矩。",
+      "核对浮点指标与独立重载结果，冻结场景执行 A→B→A 重放和局部相机轨迹。"
+    ],
+    "method": "由旋转与尺度构造协方差 Σ = R diag(s²) Rᵀ，通过投影 Jacobian 得到屏幕足迹，按深度顺序进行 alpha 合成。训练使用真实 gsplat，以 RGB MSE 更新参数；相机固定，颜色为直接 RGB。",
+    "methodDetails": [
+      "7 个 96 × 64 合成视角，seed = 42；训练 [0,2,3,4,6]、验证 [1,5]。初始 12 个高斯接近已知生成场景，目标图与预测使用同一渲染器。",
+      "appearance 仅优化颜色，joint 联合优化五组原始参数，各 600 步；fixed 与 adaptive 从同一 joint LAST 和 Adam 状态各续训 300 步。相同步数不等于相同算力。",
+      "使用 gsplat 1.5.3、classic / pinhole 模式与 RTX 4060 Laptop GPU。指标先汇总两个验证视角的 36,864 个浮点 RGB 标量，再计算 MSE 与 peak = 1 的 PSNR；不平均逐图 PSNR。"
+    ],
+    "results": "联合优化 600 步的验证 PSNR 为 53.5904 dB。配对续训中，自适应方案将高斯数从 12 增至 14，验证 MSE 比固定数量方案低 59.74%；结果仅描述本次小型合成场景。",
+    "resultTable": {
+      "caption": "两个保留视角 · appearance / joint 为 600 步，fixed / adaptive 为累计 900 步",
+      "columns": [
+        "训练方案",
+        "高斯数",
+        "验证 MSE ↓",
+        "PSNR / dB ↑"
+      ],
+      "rows": [
+        [
+          "appearance",
+          "12",
+          "3.032883e-3",
+          "25.1814"
+        ],
+        [
+          "joint",
+          "12",
+          "4.374847e-6",
+          "53.5904"
+        ],
+        [
+          "fixed",
+          "12",
+          "4.420216e-6",
+          "53.5456"
+        ],
+        [
+          "adaptive",
+          "14",
+          "1.779486e-6",
+          "57.4971"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "唯一编辑发生于续训第 50 步：2 个父高斯分裂为 4 个子高斯，验证 MSE 暂时从 4.31417e-6 升至 1.29954e-4，之后优化才改善。训练中 clone = 0、prune = 0，不能据此宣称两者带来收益。",
+      "adaptive 冻结验证的重载、批量与单相机调用、A→B→A 返回均测得最大 RGB 差为 0，参数与 checkpoint 保持不变。61 帧局部往返轨迹没有目标图像，因此不报告轨迹 PSNR。"
+    ],
+    "next": "证据限于单场景、单种子、近解初始化与相邻验证视角，全图 MSE 包含背景。高 PSNR 不证明真实三维几何正确，也不是完整原论文复现。后续可检查真实图像与更广视角，并对接 VGGT 几何初始化。公开仓库支持结果审阅与指标复核；完整训练源码和 Torch checkpoint 未分发。",
+    "links": [
+      {
+        "label": "GitHub · 3DGS 学习记录",
+        "url": "https://github.com/Allgames817/WM_Week4_3D_Gaussian_Splatting"
+      },
+      {
+        "label": "多视角拟合与评估协议",
+        "url": "https://github.com/Allgames817/WM_Week4_3D_Gaussian_Splatting/blob/main/05_Multi_View_Fitting_and_Evaluation.md"
+      },
+      {
+        "label": "受控分裂与 Adam 状态迁移",
+        "url": "https://github.com/Allgames817/WM_Week4_3D_Gaussian_Splatting/blob/main/06_Density_Control_and_Optimizer_State.md"
+      },
+      {
+        "label": "浮点结果审计表",
+        "url": "https://github.com/Allgames817/WM_Week4_3D_Gaussian_Splatting/blob/main/results/validation/reconciliation/metrics_table.csv"
+      },
+      {
+        "label": "独立验证与冻结重放",
+        "url": "https://github.com/Allgames817/WM_Week4_3D_Gaussian_Splatting/blob/main/07_Independent_Validation_and_Geometry_Bridge.md"
+      }
+    ],
+    "posts": []
+  },
+  {
+    "slug": "vggt",
+    "date": "2026-10",
+    "title": "VGGT 前馈几何学习与实验",
+    "category": "世界模型",
+    "kind": "学习实验",
+    "summary": "从双图联合推理到相机、深度与点图，检查置信度筛选的一致性与覆盖代价，并导出可追溯的统一几何接口。",
+    "tags": [
+      "VGGT",
+      "前馈几何",
+      "多视图",
+      "置信度"
+    ],
+    "status": "已完成双图推理、几何诊断与接口验收",
+    "cover": "vggt",
+    "featured": false,
+    "overview": "世界模型学习路线第五周：使用官方 kitchen 示例两图和预训练 VGGT-1B，完成相机、深度、直接点图的联合预测，并整理七个专题与原始浮点结果。本页依据 2026 年 10 月归档记录整理，未重新运行模型。",
+    "background": "NeRF 与 3DGS 关注如何用场景表示解释观测，VGGT 补充从 RGB 图像直接预测几何的入口。本项目关注预测坐标如何解释、两路几何是否一致，以及筛选后更小的分歧付出了多少像素覆盖。",
+    "work": [
+      "固定官方源码和权重版本，梳理预处理、帧内与全局注意力、相机编码及各预测头的输入输出约定。",
+      "完成单图 full、双图 camera-depth 与双图 full 三种推理，保存预测数组、运行记录和数值布局检查。",
+      "独立恢复相机变换和 Z 深度反投影，逐像素比较深度路线与直接点图，并同时报告分歧和共同覆盖率。",
+      "执行双方向、三档筛选与三档容差的跨视图诊断，导出包含来源、尺度限制和支持 mask 的 17 字段几何包。"
+    ],
+    "method": "两张图像在同一次前向中交换信息，输出相机编码、深度、世界点与置信度。解码 K 和 OpenCV w2c 后，将相机 Z 深度反投影到共同世界系；直接点图已在该参考系中，不再乘 c2w。",
+    "methodDetails": [
+      "输入由 520 × 779 缩放至 350 × 518，布局 B=1、S=2，共 362,600 个像素。使用预训练权重、FP32 参数和 BF16 autocast，无场景训练或微调；未提供查询点，因此没有运行跟踪分支。",
+      "每张图、每条点图路线分别按置信度分位数筛选，再取两路 mask 交集。high75 / high50 请求保留最高 75% / 50%，但阈值并列全部保留；分数不是正确率或已校准的几何不确定性。",
+      "跨视图使用深度路线，将源世界点投到目标相机并采样最近像素；相对 Z 残差以目标预测深度为分母，检查 2% / 5% / 10% 容差。图像外或目标无支持的位置不计为零残差。"
+    ],
+    "results": "严格筛选后，同像素两路点图的平均距离从 0.05643840 降到 0.00283589 模型单位，共同覆盖率同时从 100% 降到 34.98%。结果说明留下的子集更一致，不能据此认定原始预测或整体重建精度改善。",
+    "resultTable": {
+      "caption": "双图共 362,600 像素 · 两路独立筛选后取交集，距离为模型单位",
+      "columns": [
+        "筛选档位",
+        "共同像素",
+        "全网格覆盖",
+        "平均距离 ↓"
+      ],
+      "rows": [
+        [
+          "all",
+          "362,600",
+          "100.00%",
+          "0.05643840"
+        ],
+        [
+          "high75",
+          "312,731",
+          "86.25%",
+          "0.03912366"
+        ],
+        [
+          "high50",
+          "126,854",
+          "34.98%",
+          "0.00283589"
+        ]
+      ]
+    },
+    "resultDetails": [
+      "默认 high75 / 5% 条件下，0→1 与 1→0 分别有 116,918 和 119,084 个可比较查询，相容率为 87.58% / 86.34%；相容查询占各自整图的 56.48% / 56.71%。绝对相对残差 p95 为 58.13% / 59.89%，仍有明显长尾。",
+      "几何包保存 17 个数组字段，分别保留几何有效性与置信度支持。仓库记录独立接口检查 24/24 通过，并在归档时从浮点数组复核点图差异、18 行方向统计及合并查询统计；这些检查验证内部关系和汇总口径。",
+      "RTX 4060 Laptop GPU 的双图 full 首次前向为 1.731 s，PyTorch 峰值 allocated 为 5.237 GiB。该记录没有预热后重复计时，只说明这次运行的资源需求。"
+    ],
+    "next": "证据限于单场景双图，无外部相机、深度真值或米制标定，也未执行 BA、新视角渲染或动态长期记忆。后续可补充尺度标定、跨批次坐标对齐和多场景验证。公开仓库保留输出及检查记录，未分发完整模型源码、权重与原教学脚本。",
+    "links": [
+      {
+        "label": "GitHub · VGGT 学习记录",
+        "url": "https://github.com/Allgames817/WM_Week5_VGGT"
+      },
+      {
+        "label": "推理配置与运行诊断",
+        "url": "https://github.com/Allgames817/WM_Week5_VGGT/blob/main/03_Inference_and_Runtime_Diagnostics.md"
+      },
+      {
+        "label": "两路点图与置信度筛选",
+        "url": "https://github.com/Allgames817/WM_Week5_VGGT/blob/main/05_Point_Maps_and_Confidence.md"
+      },
+      {
+        "label": "跨视图深度一致性",
+        "url": "https://github.com/Allgames817/WM_Week5_VGGT/blob/main/06_Cross_View_Consistency.md"
+      },
+      {
+        "label": "统一几何接口与验收",
+        "url": "https://github.com/Allgames817/WM_Week5_VGGT/blob/main/07_Geometry_Packet_and_World_Model_Bridge.md"
+      }
+    ],
+    "posts": []
+  },
+  {
     "slug": "flow-matching",
     "date": "2026-09",
     "title": "Flow Matching 学习与实验",
